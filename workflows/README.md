@@ -124,8 +124,8 @@ Generates a diverse set of test cases for evaluating the Akinator agent and comm
 
 **What it does:**
 1. Sends the system prompt to an LLM asking it to generate `count` diverse test cases
-2. Each test case has: `id`, `character`, `chatMessage`, `context`, `thoughts`
-3. Validates and deduplicates by character name
+2. Each test case has: `id`, `chatMessage`, `context`, `thoughts`
+3. Validates and deduplicates by first 60 chars of `context`
 4. Commits the JSON array to `agents/{agent_folder}/evals/eval-set.json`
    - If the file already exists it updates it (uses the file's SHA); otherwise creates it
 
@@ -133,12 +133,13 @@ Generates a diverse set of test cases for evaluating the Akinator agent and comm
 ```json
 {
   "id": 1,
-  "character": "Mario",
   "chatMessage": "I am ready to play!",
-  "context": "Mario from Nintendo's Super Mario Bros. Fictional video game character. Male. Human. Italian plumber in red overalls and cap. Heroic protagonist. Mustache. Wears a red hat.",
-  "thoughts": "Yes: fictional, male, human, video game character, wears a hat, has a mustache, heroic. No: real person, villain, from a movie, non-human."
+  "context": "A 28-year-old Italian gamer is secretly thinking of Mario, the fictional Nintendo plumber in red overalls who rescues Princess Peach.",
+  "thoughts": "The user grew up playing Super Mario Bros and wants to see if the agent can narrow down a well-known video game character."
 }
 ```
+
+`chatMessage` must be a completely neutral opener that gives the agent zero information. The character name and all identifying details live exclusively in `context`. `thoughts` captures the user's motivation, not character traits.
 
 **Run this once** before using `evaluate-pr` for the first time.
 
@@ -159,9 +160,9 @@ Simulates a complete Akinator game for a single test case and returns performanc
 **Inputs:**
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `chatMessage` | string | — | User's opening message (from eval case) |
-| `context` | string | — | Full character description (used to simulate user answers) |
-| `thoughts` | string | — | Key Yes/No facts (used to simulate user answers) |
+| `chatMessage` | string | — | User's neutral opening message (zero information) |
+| `context` | string | — | Narrative embedding the character name and user scenario (simulator source of truth) |
+| `thoughts` | string | — | User's internal motivation/mindset going into the game |
 | `branch` | string | — | Branch to fetch the system prompt from |
 | `owner` | string | — | GitHub owner |
 | `repo` | string | — | GitHub repo name |

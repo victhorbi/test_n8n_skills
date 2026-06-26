@@ -4,51 +4,75 @@
       "parameters": {
         "workflowInputs": {
           "values": [
-            { "name": "system_message" },
-            { "name": "owner" },
-            { "name": "repo" },
-            { "name": "agent_folder" },
-            { "name": "count" }
+            {
+              "name": "system_message"
+            },
+            {
+              "name": "owner"
+            },
+            {
+              "name": "repo"
+            },
+            {
+              "name": "agent_folder"
+            },
+            {
+              "name": "count"
+            }
           ]
         }
       },
       "id": "e1000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "position": [0, 400],
+      "position": [
+        0,
+        400
+      ],
       "typeVersion": 1.1
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Given this system message for an Akinator-style character guessing AI:\n\n{{ $json.system_message }}\n\nGenerate {{ $json.count || 50 }} diverse test cases for evaluating this agent. Return ONLY a valid JSON array — no markdown, no explanation.\n\nEach object must have exactly these fields:\n- id: sequential integer\n- character: the full character name the user is thinking of\n- chatMessage: the user opening message to start the game (e.g. I am ready to play, or Let us begin)\n- context: full description of the character — type (fictional/real), gender, origin (movie/game/history/etc), defining physical and personality traits, notable facts — must be precise enough to answer any binary Yes/No question accurately\n- thoughts: 6-10 key binary facts Akinator would likely ask about (e.g. fictional: yes, male: yes, wears a hat: yes, villain: no, from a video game: yes)\n\nDiversity requirements across the whole set:\n- 25% video game characters\n- 25% movies or TV characters\n- 20% historical figures or real celebrities\n- 15% animated or cartoon characters\n- 15% other (sports, literature, mythology, etc)\n- 65% widely famous, 35% moderately known but not obscure\n- Vary gender, nationality, and era\n- Include at least 3 real (non-fictional) people"
+        "text": "=Given this system message for an AI agent:\n\n{{ $json.system_message }}\n\nGenerate {{ $json.count || 10 }} diverse test cases to evaluate this agent. Return ONLY a valid JSON array \u2014 no markdown, no explanation.\n\nEach object must have exactly these fields, carefully crafted to reflect realistic user behaviour:\n- id: sequential integer\n- thoughts: what the user thinks before or while composing their message \u2014 their motivation, curiosity, or goal. This is internal and never sent to the agent.\n- chatMessage: the user opening message to start the interaction. CRITICAL: this must be a neutral, non-revealing opener. Do NOT include the character name, gender, nationality, era, category, or any other identifying hint in this field. Use vague phrases such as: \"I am ready!\", \"Let's play!\", \"I have someone in mind.\", \"I am thinking of something, go ahead.\", \"Start asking me questions!\". The agent must receive zero usable information from the chatMessage alone.\n- context: 1-2 sentences describing the user scenario \u2014 who the user is (age, nationality, background) and which specific character or entity they are secretly thinking of. The character name must appear here and nowhere else.\n\nDiversity requirements:\n- Vary the user age, gender, and cultural background across the set\n- Vary the character category and difficulty: mix famous and obscure, fictional and real, historical and contemporary, human and non-human\n- Decide what else to vary based on what the system message tells you this agent specialises in"
       },
       "id": "e1000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Generate Evals",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "typeVersion": 1.4
     },
     {
       "parameters": {
         "model": "google/gemini-3-flash-preview",
-        "options": { "temperature": 0.7 }
+        "options": {
+          "temperature": 0.7
+        }
       },
       "id": "e1000003-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "LLM Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "position": [240, 640],
+      "position": [
+        240,
+        640
+      ],
       "typeVersion": 1,
       "credentials": {}
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.item.json.text || $input.item.json.output || '';\nconst trigger = $('Execute Workflow Trigger').item.json;\n\n// Extract JSON array from LLM response (handles markdown code blocks)\nconst start = raw.indexOf('[');\nconst end = raw.lastIndexOf(']');\nif (start < 0 || end <= start) throw new Error('No JSON array found. Raw output: ' + raw.slice(0, 300));\n\nlet evals;\ntry {\n  evals = JSON.parse(raw.slice(start, end + 1));\n} catch (e) {\n  throw new Error('JSON parse failed: ' + e.message + '\\nRaw: ' + raw.slice(start, start + 300));\n}\n\nif (!Array.isArray(evals)) throw new Error('Expected a JSON array, got: ' + typeof evals);\n\n// Validate required fields and deduplicate by character name\nconst seen = new Set();\nevals = evals\n  .filter(function(e) {\n    if (!e.character || !e.chatMessage || !e.context || !e.thoughts) return false;\n    const k = e.character.toLowerCase();\n    if (seen.has(k)) return false;\n    seen.add(k);\n    return true;\n  })\n  .map(function(e, i) {\n    return Object.assign({}, e, { id: i + 1 });\n  });\n\nif (evals.length < 5) throw new Error('Too few valid eval cases after filtering: ' + evals.length);\n\nconst filePath = 'agents/' + trigger.agent_folder + '/evals/eval-set.json';\n\nreturn [{ json: {\n  evals: evals,\n  count: evals.length,\n  fileContent: JSON.stringify(evals, null, 2),\n  owner: trigger.owner,\n  repo: trigger.repo,\n  filePath: filePath\n}}];"
+        "jsCode": "const raw = $input.item.json.text || $input.item.json.output || '';\nconst trigger = $('Execute Workflow Trigger').item.json;\n\n// Extract JSON array from LLM response (handles markdown code blocks)\nconst start = raw.indexOf('[');\nconst end = raw.lastIndexOf(']');\nif (start < 0 || end <= start) throw new Error('No JSON array found. Raw output: ' + raw.slice(0, 300));\n\nlet evals;\ntry {\n  evals = JSON.parse(raw.slice(start, end + 1));\n} catch (e) {\n  throw new Error('JSON parse failed: ' + e.message + '\\nRaw: ' + raw.slice(start, start + 300));\n}\n\nif (!Array.isArray(evals)) throw new Error('Expected a JSON array, got: ' + typeof evals);\n\n// Validate required fields (no top-level character field in new schema \u2014 it lives inside context)\n// Deduplicate by first 60 chars of context to catch near-identical entries\nconst seen = new Set();\nevals = evals\n  .filter(function(e) {\n    if (!e.chatMessage || !e.context || !e.thoughts) return false;\n    // Reject any chatMessage that leaks identifying information\n    const msg = e.chatMessage.toLowerCase();\n    const ctx = e.context.toLowerCase();\n    // heuristic: if the chatMessage contains words from the context beyond generic terms, flag it\n    // (not foolproof, but catches obvious leaks like character names appearing in chatMessage)\n    const k = ctx.slice(0, 60);\n    if (seen.has(k)) return false;\n    seen.add(k);\n    return true;\n  })\n  .map(function(e, i) {\n    return Object.assign({}, e, { id: i + 1 });\n  });\n\nif (evals.length < 3) throw new Error('Too few valid eval cases after filtering: ' + evals.length);\n\nconst filePath = 'agents/' + trigger.agent_folder + '/evals/eval-set.json';\n\nreturn [{ json: {\n  evals: evals,\n  count: evals.length,\n  fileContent: JSON.stringify(evals, null, 2),\n  owner: trigger.owner,\n  repo: trigger.repo,\n  filePath: filePath\n}}];"
       },
       "id": "e1000004-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Parse and Validate",
       "type": "n8n-nodes-base.code",
-      "position": [480, 400],
+      "position": [
+        480,
+        400
+      ],
       "typeVersion": 2
     },
     {
@@ -59,8 +83,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Accept", "value": "application/vnd.github+json" },
-            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
           ]
         },
         "options": {}
@@ -68,7 +98,10 @@
       "id": "e1000005-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "GET Existing File SHA",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [720, 400],
+      "position": [
+        720,
+        400
+      ],
       "typeVersion": 4.4,
       "credentials": {},
       "onError": "continueErrorOutput"
@@ -80,7 +113,10 @@
       "id": "e1000006-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Build Commit Body",
       "type": "n8n-nodes-base.code",
-      "position": [960, 400],
+      "position": [
+        960,
+        400
+      ],
       "typeVersion": 2
     },
     {
@@ -95,9 +131,18 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Type", "value": "application/json" },
-            { "name": "Accept", "value": "application/vnd.github+json" },
-            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
           ]
         },
         "options": {}
@@ -105,7 +150,10 @@
       "id": "e1000007-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Commit Eval Set",
       "type": "n8n-nodes-base.httpRequest",
-      "position": [1200, 400],
+      "position": [
+        1200,
+        400
+      ],
       "typeVersion": 4.4,
       "credentials": {}
     },
@@ -138,34 +186,97 @@
       "id": "e1000008-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Return",
       "type": "n8n-nodes-base.set",
-      "position": [1440, 400],
+      "position": [
+        1440,
+        400
+      ],
       "typeVersion": 3.4
     }
   ],
   "connections": {
     "Execute Workflow Trigger": {
-      "main": [[ { "node": "Generate Evals", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Generate Evals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Generate Evals": {
-      "main": [[ { "node": "Parse and Validate", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Parse and Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "LLM Model": {
-      "ai_languageModel": [[ { "node": "Generate Evals", "type": "ai_languageModel", "index": 0 } ]]
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Evals",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Parse and Validate": {
-      "main": [[ { "node": "GET Existing File SHA", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "GET Existing File SHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "GET Existing File SHA": {
       "main": [
-        [ { "node": "Build Commit Body", "type": "main", "index": 0 } ],
-        [ { "node": "Build Commit Body", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Build Commit Body",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Commit Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Build Commit Body": {
-      "main": [[ { "node": "Commit Eval Set", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Commit Eval Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Commit Eval Set": {
-      "main": [[ { "node": "Return", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
