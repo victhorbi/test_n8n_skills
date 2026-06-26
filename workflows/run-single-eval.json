@@ -1,0 +1,108 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "chatMessage" },
+            { "name": "context" },
+            { "name": "thoughts" },
+            { "name": "branch" },
+            { "name": "owner" },
+            { "name": "repo" },
+            { "name": "max_iterations" }
+          ]
+        }
+      },
+      "id": "e2000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [0, 400],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $json.owner }}/{{ $json.repo }}/contents/agents/akinator/system-prompt.md?ref={{ $json.branch }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e2000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Fetch System Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [240, 400],
+      "typeVersion": 4.4,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================================\n// Akinator Game Simulation Loop\n//\n// Requires env var:  OPENROUTER_API_KEY\n// Optional env var:  EVAL_MODEL  (default: google/gemini-2.5-flash-preview)\n//\n// Simulates a full game:\n//   - Akinator uses the system prompt fetched from the branch\n//   - The user is simulated using context + thoughts to answer correctly\n// =============================================================================\n\nconst trigger = $('Execute Workflow Trigger').item.json;\nconst fileData = $input.item.json;\n\n// Decode base64 system prompt (GitHub API returns content in base64)\nconst cleanB64 = (fileData.content || '').replace(/\\n/g, '');\nconst systemPrompt = Buffer.from(cleanB64, 'base64').toString('utf8');\n\nconst chatMessage = trigger.chatMessage;\nconst context = trigger.context;\nconst thoughts = trigger.thoughts;\nconst maxIter = trigger.max_iterations || 40;\nconst model = $env.EVAL_MODEL || 'google/gemini-2.5-flash-preview';\nconst apiKey = $env.OPENROUTER_API_KEY;\n\nif (!apiKey) throw new Error('OPENROUTER_API_KEY is not set in n8n environment variables (Settings > Variables)');\n\nconst BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';\n\n// LLM call helper\nconst callLLM = async (messages, sysOverride) => {\n  const payload = {\n    model: model,\n    temperature: 0.1,\n    messages: sysOverride\n      ? [{ role: 'system', content: sysOverride }].concat(messages)\n      : messages\n  };\n  const res = await this.helpers.httpRequest({\n    method: 'POST',\n    url: BASE_URL,\n    headers: {\n      'Authorization': 'Bearer ' + apiKey,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify(payload)\n  });\n  return {\n    text: res.choices[0].message.content.trim(),\n    tokens: (res.usage || {}).total_tokens || 0\n  };\n};\n\n// User simulator system prompt\nconst USER_SIM = [\n  'You are a user in an Akinator game secretly thinking of: ' + context + '.',\n  'Background: ' + thoughts,\n  'Rules:',\n  '- Answer Akinator questions ONLY with one of: Yes / No / Unknown / Probably / Probably not',\n  '- If Akinator makes a guess (\"Is your character X?\"), reply Yes if X matches ' + context + ', otherwise No',\n  '- Never reveal the character name unless confirming a correct guess'\n].join('\\n');\n\n// Conversation history for Akinator\nconst history = [\n  { role: 'system', content: systemPrompt },\n  { role: 'user', content: chatMessage }\n];\n\nlet iterations = 0;\nlet success = false;\nlet totalTokens = 0;\n\nwhile (iterations < maxIter) {\n  // --- Akinator turn ---\n  const akResp = await callLLM(history);\n  totalTokens += akResp.tokens;\n  history.push({ role: 'assistant', content: akResp.text });\n  iterations++;\n\n  // Detect if Akinator is making a guess\n  const isGuess = /is your character|are you thinking of|i think it.s|i believe it.*is|my answer is|i have reached/i.test(akResp.text);\n\n  // --- Simulated user turn ---\n  const userResp = await callLLM(\n    [{ role: 'user', content: akResp.text }],\n    USER_SIM\n  );\n  totalTokens += userResp.tokens;\n  history.push({ role: 'user', content: userResp.text });\n\n  // Check for successful guess\n  if (isGuess && userResp.text.trim().toLowerCase().startsWith('yes')) {\n    success = true;\n    break;\n  }\n}\n\nreturn [{ json: {\n  iterations: iterations,\n  success: success,\n  model: model,\n  tokens_used: totalTokens\n}}];"
+      },
+      "id": "e2000003-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Run Game Loop",
+      "type": "n8n-nodes-base.code",
+      "position": [480, 400],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2000004-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "name": "iterations",
+              "value": "={{ $json.iterations }}",
+              "type": "number"
+            },
+            {
+              "id": "e2000004-aaaa-4aaa-8aaa-bbbbbbbbbbbb",
+              "name": "success",
+              "value": "={{ $json.success }}",
+              "type": "boolean"
+            },
+            {
+              "id": "e2000004-aaaa-4aaa-8aaa-cccccccccccc",
+              "name": "model",
+              "value": "={{ $json.model }}",
+              "type": "string"
+            },
+            {
+              "id": "e2000004-aaaa-4aaa-8aaa-dddddddddddd",
+              "name": "tokens_used",
+              "value": "={{ $json.tokens_used }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e2000004-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Return",
+      "type": "n8n-nodes-base.set",
+      "position": [720, 400],
+      "typeVersion": 3.4
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [[ { "node": "Fetch System Prompt", "type": "main", "index": 0 } ]]
+    },
+    "Fetch System Prompt": {
+      "main": [[ { "node": "Run Game Loop", "type": "main", "index": 0 } ]]
+    },
+    "Run Game Loop": {
+      "main": [[ { "node": "Return", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "run-single-eval-v1"
+  }
+}

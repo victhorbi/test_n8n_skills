@@ -1,0 +1,238 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            { "name": "owner" },
+            { "name": "repo" },
+            { "name": "branch" },
+            { "name": "pr_number" },
+            { "name": "system_prompt_path" },
+            { "name": "max_iterations" }
+          ]
+        }
+      },
+      "id": "e3000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [0, 400],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $json.owner }}/{{ $json.repo }}/contents/agents/akinator/evals/eval-set.json?ref={{ $json.branch }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Fetch Eval Set",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [240, 300],
+      "typeVersion": 4.4,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $('Execute Workflow Trigger').item.json.owner }}/{{ $('Execute Workflow Trigger').item.json.repo }}/contents/{{ $('Execute Workflow Trigger').item.json.system_prompt_path || 'agents/akinator/system-prompt.md' }}?ref={{ $('Execute Workflow Trigger').item.json.branch }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3000003-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Fetch System Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [240, 500],
+      "typeVersion": 4.4,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "// =============================================================================\n// Eval Runner + Stats Aggregator\n//\n// 1. Decodes eval set and system prompt from GitHub API response\n// 2. Runs every eval case against the Akinator (game loop per case)\n// 3. Computes quality stats\n// 4. Extracts any existing quality baseline from the system prompt header\n// 5. Builds updated system prompt with new quality score prepended\n//\n// Requires env var: OPENROUTER_API_KEY\n// Optional env var: EVAL_MODEL\n// =============================================================================\n\nconst trigger = $('Execute Workflow Trigger').item.json;\nconst evalFileData = $('Fetch Eval Set').item.json;\nconst promptFileData = $('Fetch System Prompt').item.json;\n\n// --- Decode eval set ---\nconst evalB64 = (evalFileData.content || '').replace(/\\n/g, '');\nconst evalJson = Buffer.from(evalB64, 'base64').toString('utf8');\nlet evals;\ntry { evals = JSON.parse(evalJson); } catch(e) { throw new Error('Could not parse eval set: ' + e.message); }\n\n// --- Decode system prompt ---\nconst promptB64 = (promptFileData.content || '').replace(/\\n/g, '');\nconst currentPrompt = Buffer.from(promptB64, 'base64').toString('utf8');\nconst promptFileSha = promptFileData.sha;\nconst promptPath = trigger.system_prompt_path || 'agents/akinator/system-prompt.md';\n\n// Strip any existing quality header so we run against the clean prompt\nconst cleanPrompt = currentPrompt.replace(/<!--\\s*QUALITY_SCORE[\\s\\S]*?-->\\s*\\n*/g, '').trim();\n\n// --- Extract baseline stats from existing header (if any) ---\nlet baseline = null;\nconst headerMatch = currentPrompt.match(/<!--\\s*QUALITY_SCORE([\\s\\S]*?)-->/);\nif (headerMatch) {\n  try { baseline = JSON.parse(headerMatch[1].trim()); } catch(e) { /* non-fatal */ }\n}\n\n// --- Game simulation ---\nconst model = $env.EVAL_MODEL || 'google/gemini-2.5-flash-preview';\nconst apiKey = $env.OPENROUTER_API_KEY;\nif (!apiKey) throw new Error('OPENROUTER_API_KEY is not set in n8n environment variables');\n\nconst maxIter = trigger.max_iterations || 40;\nconst BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';\n\nconst callLLM = async (messages, sysOverride) => {\n  const payload = {\n    model: model,\n    temperature: 0.1,\n    messages: sysOverride\n      ? [{ role: 'system', content: sysOverride }].concat(messages)\n      : messages\n  };\n  const res = await this.helpers.httpRequest({\n    method: 'POST',\n    url: BASE_URL,\n    headers: {\n      'Authorization': 'Bearer ' + apiKey,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify(payload)\n  });\n  return {\n    text: res.choices[0].message.content.trim(),\n    tokens: (res.usage || {}).total_tokens || 0\n  };\n};\n\nconst runGame = async (evalCase) => {\n  const userSim = [\n    'You are a user in Akinator secretly thinking of: ' + evalCase.context + '.',\n    'Facts: ' + evalCase.thoughts,\n    'Answer questions with ONLY: Yes / No / Unknown / Probably / Probably not.',\n    'If Akinator guesses by asking \"Is your character X?\", reply Yes if correct (' + evalCase.character + '), else No.',\n    'Never volunteer the character name.'\n  ].join('\\n');\n\n  const hist = [\n    { role: 'system', content: cleanPrompt },\n    { role: 'user', content: evalCase.chatMessage }\n  ];\n  let iter = 0, success = false, tokens = 0;\n\n  while (iter < maxIter) {\n    const akResp = await callLLM(hist);\n    tokens += akResp.tokens;\n    hist.push({ role: 'assistant', content: akResp.text });\n    iter++;\n\n    const isGuess = /is your character|are you thinking of|i think it.s|i believe it.*is|my answer is|i have reached/i.test(akResp.text);\n\n    const userResp = await callLLM(\n      [{ role: 'user', content: akResp.text }],\n      userSim\n    );\n    tokens += userResp.tokens;\n    hist.push({ role: 'user', content: userResp.text });\n\n    if (isGuess && userResp.text.trim().toLowerCase().startsWith('yes')) {\n      success = true;\n      break;\n    }\n  }\n  return { character: evalCase.character, iterations: iter, success: success, tokens_used: tokens };\n};\n\n// Run all evals sequentially\nconst results = [];\nfor (const evalCase of evals) {\n  const r = await runGame(evalCase);\n  results.push(r);\n}\n\n// --- Aggregate stats ---\nconst successes = results.filter(function(r) { return r.success; });\nconst successRate = Math.round((successes.length / results.length) * 1000) / 10;\nconst avgIter = Math.round(results.reduce(function(s, r) { return s + r.iterations; }, 0) / results.length * 10) / 10;\nconst totalTokens = results.reduce(function(s, r) { return s + r.tokens_used; }, 0);\nconst tokensPerGame = Math.round(totalTokens / results.length);\nconst evaluatedAt = new Date().toISOString();\n\nconst newStats = {\n  model: model,\n  total_games: results.length,\n  successful_games: successes.length,\n  success_rate: successRate,\n  avg_iterations: avgIter,\n  total_tokens: totalTokens,\n  tokens_per_game: tokensPerGame,\n  evaluated_at: evaluatedAt\n};\n\n// --- Quality comparison ---\nlet improved = false;\nif (baseline) {\n  const oldRate = parseFloat(baseline.success_rate || 0);\n  const oldIter = parseFloat(baseline.avg_iterations || 999);\n  improved = successRate > oldRate && avgIter < oldIter;\n}\n\n// --- Build updated system prompt with quality header ---\nconst qualityHeader = '<!-- QUALITY_SCORE\\n' + JSON.stringify(newStats, null, 2) + '\\n-->\\n\\n';\nconst updatedPrompt = qualityHeader + cleanPrompt;\n\nreturn [{ json: {\n  results: results,\n  stats: newStats,\n  baseline: baseline,\n  improved: improved,\n  updatedPrompt: updatedPrompt,\n  promptFileSha: promptFileSha,\n  promptPath: promptPath,\n  owner: trigger.owner,\n  repo: trigger.repo,\n  branch: trigger.branch,\n  pr_number: trigger.pr_number\n}}];"
+      },
+      "id": "e3000004-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Run All Evals + Build Report",
+      "type": "n8n-nodes-base.code",
+      "position": [480, 400],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\n\nconst body = {\n  message: 'chore: add quality score to system prompt [auto-eval]',\n  content: Buffer.from(data.updatedPrompt).toString('base64'),\n  branch: data.branch,\n  sha: data.promptFileSha\n};\n\nreturn [{ json: {\n  commitBody: JSON.stringify(body),\n  owner: data.owner,\n  repo: data.repo,\n  promptPath: data.promptPath,\n  stats: data.stats,\n  improved: data.improved,\n  pr_number: data.pr_number\n}}];"
+      },
+      "id": "e3000005-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Build Commit Body",
+      "type": "n8n-nodes-base.code",
+      "position": [720, 400],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/{{ $json.owner }}/{{ $json.repo }}/contents/{{ $json.promptPath }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json.commitBody }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3000006-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Commit Quality Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [960, 400],
+      "typeVersion": 4.4,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "strict", "version": 3 },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "e3000007-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true },
+              "leftValue": "={{ $('Build Commit Body').item.json.improved }}"
+            },
+            {
+              "id": "e3000007-aaaa-4aaa-8aaa-bbbbbbbbbbbb",
+              "operator": { "type": "number", "operation": "exists", "singleValue": true },
+              "leftValue": "={{ $('Build Commit Body').item.json.pr_number }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3000007-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Quality Improved?",
+      "type": "n8n-nodes-base.if",
+      "position": [1200, 400],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.github.com/repos/{{ $('Build Commit Body').item.json.owner }}/{{ $('Build Commit Body').item.json.repo }}/pulls/{{ $('Build Commit Body').item.json.pr_number }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"draft\": false }",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3000008-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Mark PR Ready",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1440, 280],
+      "typeVersion": 4.4,
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e3000009-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+              "name": "quality_score",
+              "value": "={{ $('Build Commit Body').item.json.stats }}",
+              "type": "object"
+            },
+            {
+              "id": "e3000009-aaaa-4aaa-8aaa-bbbbbbbbbbbb",
+              "name": "improved",
+              "value": "={{ $('Build Commit Body').item.json.improved }}",
+              "type": "boolean"
+            },
+            {
+              "id": "e3000009-aaaa-4aaa-8aaa-cccccccccccc",
+              "name": "pr_ready",
+              "value": "={{ $('Build Commit Body').item.json.improved }}",
+              "type": "boolean"
+            },
+            {
+              "id": "e3000009-aaaa-4aaa-8aaa-dddddddddddd",
+              "name": "pr_url",
+              "value": "={{ $json.html_url || null }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3000009-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Return",
+      "type": "n8n-nodes-base.set",
+      "position": [1680, 400],
+      "typeVersion": 3.4
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          { "node": "Fetch Eval Set", "type": "main", "index": 0 },
+          { "node": "Fetch System Prompt", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch Eval Set": {
+      "main": [[ { "node": "Run All Evals + Build Report", "type": "main", "index": 0 } ]]
+    },
+    "Fetch System Prompt": {
+      "main": [[ { "node": "Run All Evals + Build Report", "type": "main", "index": 1 } ]]
+    },
+    "Run All Evals + Build Report": {
+      "main": [[ { "node": "Build Commit Body", "type": "main", "index": 0 } ]]
+    },
+    "Build Commit Body": {
+      "main": [[ { "node": "Commit Quality Report", "type": "main", "index": 0 } ]]
+    },
+    "Commit Quality Report": {
+      "main": [[ { "node": "Quality Improved?", "type": "main", "index": 0 } ]]
+    },
+    "Quality Improved?": {
+      "main": [
+        [ { "node": "Mark PR Ready", "type": "main", "index": 0 } ],
+        [ { "node": "Return", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Mark PR Ready": {
+      "main": [[ { "node": "Return", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "evaluate-pr-v1"
+  }
+}
