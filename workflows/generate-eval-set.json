@@ -127,7 +127,6 @@
         "nodeCredentialType": "githubApi",
         "sendBody": true,
         "specifyBody": "json",
-        "body": "={{ $json.commitBody }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -145,7 +144,8 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "jsonBody": "={{ $json.commitBody }}"
       },
       "id": "e1000007-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Commit Eval Set",

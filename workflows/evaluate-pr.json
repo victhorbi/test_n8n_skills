@@ -134,7 +134,6 @@
         "nodeCredentialType": "githubApi",
         "sendBody": true,
         "specifyBody": "json",
-        "body": "={{ $json.commitBody }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -152,7 +151,8 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "jsonBody": "={{ $json.commitBody }}"
       },
       "id": "e3000006-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Commit Quality Report",
