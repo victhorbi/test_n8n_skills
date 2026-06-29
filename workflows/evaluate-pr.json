@@ -283,21 +283,8 @@
     },
     {
       "parameters": {
-        "jsCode": "// Run ONE complete game for the current eval case item.\n// n8n executes this once per item (one eval case = one Code node run).\n// ~5-15 API calls per game \u2014 well under the 60 s timeout.\nconst item = $input.item.json;\nconst model = $env.EVAL_MODEL || 'google/gemini-2.5-flash-preview';\nconst apiKey = $env.OPENROUTER_API_KEY;\nif (!apiKey) throw new Error('OPENROUTER_API_KEY is not set in n8n environment variables');\n\nconst BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';\nconst callLLM = async (messages, sys) => {\n  const res = await this.helpers.httpRequest({\n    method: 'POST', url: BASE_URL,\n    headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },\n    body: JSON.stringify({\n      model: model, temperature: 0.1,\n      messages: sys ? [{ role: 'system', content: sys }].concat(messages) : messages\n    })\n  });\n  return { text: res.choices[0].message.content.trim(), tokens: (res.usage || {}).total_tokens || 0 };\n};\n\nconst userSim = [\n  'You are roleplaying as a user in a guessing game. Your scenario: ' + item.context + '.',\n  'Your mindset going into the game: ' + item.thoughts,\n  '',\n  'Rules:',\n  '- Answer every question from the host with ONLY one of: Yes / No / Unknown / Probably / Probably not',\n  '- Use your knowledge of the character described in your scenario to answer accurately',\n  '- If the host makes a direct guess naming a character, reply Yes only if that is the character in your scenario, otherwise No',\n  '- Never reveal the character name or any identifying detail unprompted \\u2014 only confirm or deny explicit guesses'\n].join('\\n');\n\nconst hist = [\n  { role: 'system', content: item.cleanPrompt },\n  { role: 'user',   content: item.chatMessage }\n];\nlet iter = 0, success = false, tokens = 0;\nconst maxIter = item.max_iterations || 40;\n\nwhile (iter < maxIter) {\n  const akResp = await callLLM(hist);\n  tokens += akResp.tokens;\n  hist.push({ role: 'assistant', content: akResp.text });\n  iter++;\n\n  const isGuess = /is your character|are you thinking of|i think it.s|i believe it.*is|my answer is|i have reached/i.test(akResp.text);\n\n  const userResp = await callLLM([{ role: 'user', content: akResp.text }], userSim);\n  tokens += userResp.tokens;\n  hist.push({ role: 'user', content: userResp.text });\n\n  if (isGuess && userResp.text.trim().toLowerCase().startsWith('yes')) { success = true; break; }\n}\n\n// Game result + pass-through shared metadata for the aggregation step\nreturn [{ json: {\n  iterations: iter, success: success, model: model, tokens_used: tokens,\n  baseline:          item.baseline,\n  cleanPrompt:       item.cleanPrompt,\n  branch:            item.branch,\n  owner:             item.owner,\n  repo:              item.repo,\n  pr_number:         item.pr_number,\n  prompt_path:       item.prompt_path,\n  promptFileSha:     item.promptFileSha,\n  min_success_rate:  item.min_success_rate,\n  max_avg_iterations: item.max_avg_iterations\n}}];"
-      },
-      "id": "e3000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      "name": "Run Single Game",
-      "type": "n8n-nodes-base.code",
-      "position": [
-        720,
-        400
-      ],
-      "typeVersion": 2
-    },
-    {
-      "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "// Aggregate all per-game results, compare vs baseline, build updated system prompt.\nconst all = $input.all();\nif (!all || all.length === 0) throw new Error('No eval results to aggregate');\n\nconst meta    = all[0].json;\nconst baseline = meta.baseline;\nconst cleanPrompt = meta.cleanPrompt;\nconst minRate  = parseFloat(meta.min_success_rate  || 50);\nconst maxIters = parseFloat(meta.max_avg_iterations || 30);\n\nconst results = all.map(function(it) {\n  return { iterations: it.json.iterations, success: it.json.success,\n           model: it.json.model, tokens_used: it.json.tokens_used };\n});\n\nconst successes    = results.filter(function(r) { return r.success; });\nconst successRate  = Math.round((successes.length / results.length) * 1000) / 10;\nconst avgIter      = Math.round(results.reduce(function(s,r) { return s+r.iterations; }, 0) / results.length * 10) / 10;\nconst totalTokens  = results.reduce(function(s,r) { return s+r.tokens_used; }, 0);\nconst tokensPerGame = Math.round(totalTokens / results.length);\n\nconst newStats = {\n  model:            meta.model || results[0].model,\n  total_games:      results.length,\n  successful_games: successes.length,\n  success_rate:     successRate,\n  avg_iterations:   avgIter,\n  total_tokens:     totalTokens,\n  tokens_per_game:  tokensPerGame,\n  evaluated_at:     new Date().toISOString()\n};\n\nconst firstRun = !baseline;\nlet improved = false;\nif (firstRun) {\n  improved = successRate >= minRate && avgIter <= maxIters;\n} else {\n  improved = successRate > parseFloat(baseline.success_rate || 0)\n          && avgIter    < parseFloat(baseline.avg_iterations || 999);\n}\nnewStats.first_run       = firstRun;\nnewStats.thresholds_used = firstRun ? { min_success_rate: minRate, max_avg_iterations: maxIters } : null;\n\nconst updatedPrompt = '<!-- QUALITY_SCORE\\n' + JSON.stringify(newStats, null, 2) + '\\n-->\\n\\n' + cleanPrompt;\n\nreturn [{ json: {\n  results:      results,\n  stats:        newStats,\n  baseline:     baseline,\n  first_run:    firstRun,\n  improved:     improved,\n  updatedPrompt: updatedPrompt,\n  promptFileSha: meta.promptFileSha,\n  promptPath:    meta.prompt_path,\n  owner:         meta.owner,\n  repo:          meta.repo,\n  branch:        meta.branch,\n  pr_number:     meta.pr_number\n}}];"
+        "jsCode": "// Aggregate all per-game results, compare vs baseline, build updated system prompt.\nconst all = $input.all();\nif (!all || all.length === 0) throw new Error('No eval results to aggregate');\n\nconst meta    = all[0].json;\nconst baseline = meta.baseline;\nconst cleanPrompt = meta.cleanPrompt;\nconst minRate  = parseFloat(meta.min_success_rate  || 50);\nconst maxIters = parseFloat(meta.max_avg_iterations || 30);\n\nconst results = all.map(function(it) {\n  return { iterations: it.json.iter, success: it.json.success,\n           model: it.json.model, tokens_used: it.json.tokens_used };\n});\n\nconst successes    = results.filter(function(r) { return r.success; });\nconst successRate  = Math.round((successes.length / results.length) * 1000) / 10;\nconst avgIter      = Math.round(results.reduce(function(s,r) { return s+r.iterations; }, 0) / results.length * 10) / 10;\nconst totalTokens  = results.reduce(function(s,r) { return s+r.tokens_used; }, 0);\nconst tokensPerGame = Math.round(totalTokens / results.length);\n\nconst newStats = {\n  model:            meta.model || results[0].model,\n  total_games:      results.length,\n  successful_games: successes.length,\n  success_rate:     successRate,\n  avg_iterations:   avgIter,\n  total_tokens:     totalTokens,\n  tokens_per_game:  tokensPerGame,\n  evaluated_at:     new Date().toISOString()\n};\n\nconst firstRun = !baseline;\nlet improved = false;\nif (firstRun) {\n  improved = successRate >= minRate && avgIter <= maxIters;\n} else {\n  improved = successRate > parseFloat(baseline.success_rate || 0)\n          && avgIter    < parseFloat(baseline.avg_iterations || 999);\n}\nnewStats.first_run       = firstRun;\nnewStats.thresholds_used = firstRun ? { min_success_rate: minRate, max_avg_iterations: maxIters } : null;\n\nconst updatedPrompt = '<!-- QUALITY_SCORE\\n' + JSON.stringify(newStats, null, 2) + '\\n-->\\n\\n' + cleanPrompt;\n\nreturn [{ json: {\n  results:      results,\n  stats:        newStats,\n  baseline:     baseline,\n  first_run:    firstRun,\n  improved:     improved,\n  updatedPrompt: updatedPrompt,\n  promptFileSha: meta.promptFileSha,\n  promptPath:    meta.prompt_path,\n  owner:         meta.owner,\n  repo:          meta.repo,\n  branch:        meta.branch,\n  pr_number:     meta.pr_number\n}}];"
       },
       "id": "e3000003-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       "name": "Aggregate & Build Report",
@@ -307,6 +294,77 @@
         400
       ],
       "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Set up initial game state \u2014 one item per eval case.\nconst item = $input.item.json;\nconst model = $env.EVAL_MODEL || 'google/gemini-2.5-flash-preview';\nreturn [{ json: Object.assign({}, item, {\n  history: [\n    { role: 'system', content: item.cleanPrompt },\n    { role: 'user',   content: item.chatMessage }\n  ],\n  iter:       0,\n  success:    false,\n  done:       false,\n  tokens_used: 0,\n  is_guess:   false,\n  model:      model\n}) }];"
+      },
+      "id": "e4000001-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Init Game State",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        720,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// ONE API call: Akinator's turn.\nconst item = $input.item.json;\nconst apiKey = $env.OPENROUTER_API_KEY;\nif (!apiKey) throw new Error('OPENROUTER_API_KEY not set');\n\nconst res = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://openrouter.ai/api/v1/chat/completions',\n  headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: item.model, temperature: 0.1, messages: item.history })\n});\nconst reply   = res.choices[0].message.content.trim();\nconst tokens  = (res.usage || {}).total_tokens || 0;\nconst isGuess = /is your character|are you thinking of|i think it.s|i believe it.*is|my answer is|i have reached/i.test(reply);\n\nreturn [{ json: Object.assign({}, item, {\n  history:             item.history.concat([{ role: 'assistant', content: reply }]),\n  iter:                item.iter + 1,\n  tokens_used:         item.tokens_used + tokens,\n  is_guess:            isGuess,\n  last_akinator_reply: reply\n}) }];"
+      },
+      "id": "e4000002-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "Akinator Call",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        960,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// ONE API call: simulated user's turn.\nconst item = $input.item.json;\nconst apiKey = $env.OPENROUTER_API_KEY;\nif (!apiKey) throw new Error('OPENROUTER_API_KEY not set');\n\nconst userSim = [\n  'You are roleplaying as a user in a guessing game. Your scenario: ' + item.context + '.',\n  'Your mindset going into the game: ' + item.thoughts,\n  '',\n  'Rules:',\n  '- Answer every question from the host with ONLY one of: Yes / No / Unknown / Probably / Probably not',\n  '- Use your knowledge of the character described in your scenario to answer accurately',\n  '- If the host makes a direct guess naming a character, reply Yes only if that is the character in your scenario, otherwise No',\n  '- Never reveal the character name or any identifying detail unprompted \\u2014 only confirm or deny explicit guesses'\n].join('\\n');\n\nconst res = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://openrouter.ai/api/v1/chat/completions',\n  headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    model: item.model, temperature: 0.1,\n    messages: [{ role: 'system', content: userSim }, { role: 'user', content: item.last_akinator_reply }]\n  })\n});\nconst userReply = res.choices[0].message.content.trim();\nconst tokens    = (res.usage || {}).total_tokens || 0;\nconst success   = item.is_guess && userReply.trim().toLowerCase().startsWith('yes');\nconst done      = success || item.iter >= item.max_iterations;\n\nreturn [{ json: Object.assign({}, item, {\n  history:        item.history.concat([{ role: 'user', content: userReply }]),\n  tokens_used:    item.tokens_used + tokens,\n  success:        success,\n  done:           done,\n  last_user_reply: userReply\n}) }];"
+      },
+      "id": "e4000003-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "User Sim Call",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1200,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "e4000004-done-check",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e4000004-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "name": "IF Done?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1440,
+        400
+      ],
+      "typeVersion": 2.2
     }
   ],
   "connections": {
@@ -403,18 +461,7 @@
       "main": [
         [
           {
-            "node": "Run Single Game",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Run Single Game": {
-      "main": [
-        [
-          {
-            "node": "Aggregate & Build Report",
+            "node": "Init Game State",
             "type": "main",
             "index": 0
           }
@@ -426,6 +473,57 @@
         [
           {
             "node": "Build Commit Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Game State": {
+      "main": [
+        [
+          {
+            "node": "Akinator Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Akinator Call": {
+      "main": [
+        [
+          {
+            "node": "User Sim Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Sim Call": {
+      "main": [
+        [
+          {
+            "node": "IF Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Done?": {
+      "main": [
+        [
+          {
+            "node": "Aggregate & Build Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Akinator Call",
             "type": "main",
             "index": 0
           }
