@@ -56,14 +56,14 @@ export async function getContent(
  */
 export async function putContent(
   cfg: Config,
-  opts: { path: string; content: string; message: string; branch: string | null; sha: string },
+  opts: { path: string; content: string; message: string; branch: string | null; sha?: string },
 ): Promise<void> {
   const url = `${API}/repos/${cfg.owner}/${cfg.repo}/contents/${opts.path}`;
   const body: Record<string, unknown> = {
     message: opts.message,
     content: encodeBase64(opts.content),
-    sha: opts.sha,
   };
+  if (opts.sha) body.sha = opts.sha; // omit sha for new files
   if (opts.branch) body.branch = opts.branch; // omit -> default branch
   const res = await ghFetch(cfg.githubToken, url, { method: "PUT", body: JSON.stringify(body) });
   if (!res.ok) {

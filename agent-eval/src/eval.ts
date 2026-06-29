@@ -130,6 +130,34 @@ export async function runEval(cfg: Config): Promise<EvalReport> {
     return report;
   }
 
+  // Persist conversation log (non-fatal — analysis workflow reads these later)
+  try {
+    const logTs = agg.stats.evaluated_at.replace(/[:.]/g, "-").slice(0, 19);
+    const logPath = `${cfg.agentFolder}/evals/logs/${logTs}-${runId}.json`;
+    await putContent(cfg, {
+      path: logPath,
+      content: JSON.stringify(
+        {
+          run_id: runId,
+          branch: cfg.branch,
+          pr_number: cfg.prNumber,
+          agent_folder: cfg.agentFolder,
+          evaluated_at: agg.stats.evaluated_at,
+          stats: agg.stats,
+          games: results,
+        },
+        null,
+        2,
+      ),
+      message: `chore: save eval log ${runId} [auto-eval]`,
+      branch: cfg.branch,
+      // no sha — always a new file
+    });
+    console.log(`Saved eval log → ${logPath}`);
+  } catch (err) {
+    console.warn(`Could not save eval log: ${(err as Error).message}`);
+  }
+
   if (cfg.commit) {
     await putContent(cfg, {
       path: promptPath,
