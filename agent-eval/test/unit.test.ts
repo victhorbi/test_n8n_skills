@@ -28,11 +28,17 @@ function game(id: number, iterations: number, success: boolean, tokens = 0): Gam
   return { id, iterations, success, tokens_used: tokens, transcript: [] };
 }
 
+function errorGame(id: number): GameResult {
+  return { id, iterations: 0, success: false, tokens_used: 0, error: "timeout", transcript: [] };
+}
+
 // --- parsePrompt ---
 {
   const stats: QualityStats = {
     model: "m",
     total_games: 10,
+    valid_games: 10,
+    errored_games: 0,
     successful_games: 6,
     success_rate: 60,
     avg_iterations: 12,
@@ -61,6 +67,9 @@ function game(id: number, iterations: number, success: boolean, tokens = 0): Gam
   assert.equal(r.firstRun, true);
   assert.equal(r.stats.success_rate, 75); // 3/4
   assert.equal(r.stats.avg_iterations, 19.5); // (10+20+40+8)/4
+  assert.equal(r.stats.total_games, 4);
+  assert.equal(r.stats.valid_games, 4);
+  assert.equal(r.stats.errored_games, 0);
   assert.equal(r.improved, true); // 75>=50 and 19.5<=30
   assert.ok(r.updatedPrompt.startsWith("<!-- QUALITY_SCORE"));
   assert.ok(r.updatedPrompt.endsWith("PROMPT"));
@@ -82,6 +91,8 @@ function game(id: number, iterations: number, success: boolean, tokens = 0): Gam
   const baseline: QualityStats = {
     model: "m",
     total_games: 4,
+    valid_games: 4,
+    errored_games: 0,
     successful_games: 2,
     success_rate: 50,
     avg_iterations: 25,
@@ -103,6 +114,8 @@ function game(id: number, iterations: number, success: boolean, tokens = 0): Gam
   const baseline: QualityStats = {
     model: "m",
     total_games: 4,
+    valid_games: 4,
+    errored_games: 0,
     successful_games: 2,
     success_rate: 50,
     avg_iterations: 10,
@@ -114,6 +127,31 @@ function game(id: number, iterations: number, success: boolean, tokens = 0): Gam
   const r = aggregate(cfg, results, baseline, "P");
   assert.equal(r.improved, false); // rate up (75>50) but avg 20 !< 10
   console.log("ok: aggregate vs baseline regression on iterations");
+}
+
+// --- aggregate: partial errors within 80% threshold → proceeds ---
+{
+  const cfg = baseConfig();
+  // 1 error out of 5 = 80% valid — exactly at the threshold, should pass
+  const results = [game(1, 10, true), game(2, 10, true), game(3, 10, true), game(4, 10, true), errorGame(5)];
+  const r = aggregate(cfg, results, null, "P");
+  assert.equal(r.stats.total_games, 5);
+  assert.equal(r.stats.valid_games, 4);
+  assert.equal(r.stats.errored_games, 1);
+  assert.equal(r.stats.success_rate, 100); // 4/4 valid succeeded
+  console.log("ok: aggregate tolerates errors within 80% threshold");
+}
+
+// --- aggregate: too many errors → throws ---
+{
+  const cfg = baseConfig();
+  // 2 errors out of 5 = 60% valid — below 80%, should throw
+  const results = [game(1, 10, true), game(2, 10, true), game(3, 10, true), errorGame(4), errorGame(5)];
+  assert.throws(
+    () => aggregate(cfg, results, null, "P"),
+    /Too many eval errors/,
+  );
+  console.log("ok: aggregate throws when errors exceed 20%");
 }
 
 console.log("\nAll unit tests passed.");

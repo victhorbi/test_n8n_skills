@@ -33,6 +33,8 @@ function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
+const MIN_VALIDITY_RATE = 0.8;
+
 /** Compute aggregate stats and the new prompt from raw game results. */
 export function aggregate(
   cfg: Config,
@@ -42,16 +44,35 @@ export function aggregate(
 ): Omit<EvalReport, "results" | "promptPath"> {
   if (results.length === 0) throw new Error("No eval results to aggregate");
 
-  const successes = results.filter((r) => r.success);
-  const successRate = round1((successes.length / results.length) * 100);
-  const avgIter = round1(results.reduce((s, r) => s + r.iterations, 0) / results.length);
-  const totalTokens = results.reduce((s, r) => s + r.tokens_used, 0);
-  const tokensPerGame = Math.round(totalTokens / results.length);
+  const errored = results.filter((r) => r.error !== undefined);
+  const valid = results.filter((r) => r.error === undefined);
+
+  if (errored.length > 0) {
+    console.error(
+      `Errored games (${errored.length}): ${errored.map((r) => `#${r.id} ${r.error}`).join("; ")}`,
+    );
+  }
+
+  const validityRate = valid.length / results.length;
+  if (validityRate < MIN_VALIDITY_RATE) {
+    throw new Error(
+      `Too many eval errors: ${errored.length}/${results.length} games failed — ` +
+        `need at least ${MIN_VALIDITY_RATE * 100}% valid (got ${round1(validityRate * 100)}%)`,
+    );
+  }
+
+  const successes = valid.filter((r) => r.success);
+  const successRate = round1((successes.length / valid.length) * 100);
+  const avgIter = round1(valid.reduce((s, r) => s + r.iterations, 0) / valid.length);
+  const totalTokens = valid.reduce((s, r) => s + r.tokens_used, 0);
+  const tokensPerGame = Math.round(totalTokens / valid.length);
 
   const firstRun = !baseline;
   const stats: QualityStats = {
     model: cfg.userModel,
     total_games: results.length,
+    valid_games: valid.length,
+    errored_games: errored.length,
     successful_games: successes.length,
     success_rate: successRate,
     avg_iterations: avgIter,

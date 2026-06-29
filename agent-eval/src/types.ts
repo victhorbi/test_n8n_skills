@@ -15,9 +15,11 @@ export interface EvalCase {
 export interface QualityStats {
   model: string;
   total_games: number;
+  valid_games: number;
+  errored_games: number;
   successful_games: number;
-  success_rate: number; // percentage, one decimal
-  avg_iterations: number; // one decimal
+  success_rate: number; // percentage, one decimal — computed over valid games only
+  avg_iterations: number; // one decimal — computed over valid games only
   total_tokens: number;
   tokens_per_game: number;
   evaluated_at: string; // ISO timestamp
@@ -31,6 +33,8 @@ export interface GameResult {
   iterations: number;
   success: boolean;
   tokens_used: number;
+  /** Set when the game crashed rather than completing normally. */
+  error?: string;
   /** Full turn-by-turn transcript, useful for debugging in CI logs. */
   transcript: Array<{ role: "agent" | "user"; text: string }>;
 }

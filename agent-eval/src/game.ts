@@ -89,6 +89,7 @@ export async function runGames(
           iterations: cfg.maxIterations,
           success: false,
           tokens_used: 0,
+          error: message,
           transcript: [{ role: "user", text: `ERROR: ${message}` }],
         };
       }
