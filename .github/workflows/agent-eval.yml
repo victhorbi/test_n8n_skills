@@ -1,0 +1,104 @@
+name: Agent Eval
+
+on:
+  pull_request:
+    paths:
+      - "agents/**"
+  workflow_dispatch:
+    inputs:
+      agent_folder:
+        description: "Agent folder to evaluate (e.g. agents/akinator)"
+        required: true
+        default: "agents/akinator"
+      min_success_rate:
+        description: "Minimum success rate for first-run pass"
+        required: false
+        default: "50"
+      max_avg_iterations:
+        description: "Maximum average iterations for first-run pass"
+        required: false
+        default: "30"
+
+# Least privilege: write only what the eval needs (commit score + mark PR ready).
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: agent-eval-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.find.outputs.matrix }}
+      count: ${{ steps.find.outputs.count }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
+        with:
+          fetch-depth: 0
+
+      - id: find
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_FOLDER: ${{ github.event.inputs.agent_folder }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            matrix=$(printf '%s' "$DISPATCH_FOLDER" | python3 -c 'import sys,json;print(json.dumps([sys.stdin.read().strip()]))')
+          else
+            changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true)
+            matrix=$(printf '%s' "$changed" | python3 -c '
+import sys,json,re
+dirs=set()
+for line in sys.stdin:
+    line=line.strip()
+    m=re.match(r"^(agents/[^/]+)/", line)
+    if m: dirs.add(m.group(1))
+print(json.dumps(sorted(dirs)))
+')
+          fi
+          count=$(printf '%s' "$matrix" | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))')
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Agent folders to evaluate: $matrix"
+
+  eval:
+    needs: detect
+    if: ${{ needs.detect.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        agent_folder: ${{ fromJSON(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # actions/setup-node v4
+        with:
+          node-version-file: agent-eval/.nvmrc
+          cache: "npm"
+          cache-dependency-path: agent-eval/package-lock.json
+
+      - run: npm ci
+        working-directory: agent-eval
+
+      - name: Run eval
+        working-directory: agent-eval
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          N8N_AGENT_WEBHOOK_URL: ${{ secrets.N8N_AGENT_WEBHOOK_URL }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          AGENT_FOLDER: ${{ matrix.agent_folder }}
+          BRANCH: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MIN_SUCCESS_RATE: ${{ github.event.inputs.min_success_rate || '50' }}
+          MAX_AVG_ITERATIONS: ${{ github.event.inputs.max_avg_iterations || '30' }}
+          CONCURRENCY: "1"
+          FAIL_ON_REGRESSION: "false"
+        run: npm run eval

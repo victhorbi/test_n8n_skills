@@ -1,0 +1,20 @@
+{
+  "name": "agent-eval",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Repo-driven eval harness for the Akinator-style agent. Runs in GitHub Actions on PRs; the agent under test is hosted as an n8n chat webhook.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "eval": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx test/unit.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}
