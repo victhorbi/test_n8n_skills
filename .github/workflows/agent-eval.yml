@@ -2,9 +2,6 @@ name: Agent Eval
 
 on:
   pull_request:
-    paths:
-      - "agents/**"
-      - "skills/**"
   workflow_dispatch:
     inputs:
       agent_name:
