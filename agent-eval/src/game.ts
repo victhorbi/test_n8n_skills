@@ -83,30 +83,20 @@ export async function runGames(
     while (cursor < cases.length) {
       const i = cursor++;
       const c = cases[i];
-      let lastErr = "";
-      for (let attempt = 0; attempt <= 1; attempt++) {
-        try {
-          if (attempt > 0) {
-            await sleep(12_000);
-            console.warn(`game ${c.id}: retrying after gateway timeout…`);
-          }
-          // Use a fresh session ID on retry so n8n starts a clean conversation.
-          const effectiveRunId = attempt > 0 ? `${runId}-r${attempt}` : runId;
-          results[i] = await runGame(cfg, c, effectiveRunId);
-          break;
-        } catch (err) {
-          lastErr = err instanceof Error ? err.message : String(err);
-          if (attempt === 0 && RETRIABLE_STATUS.test(lastErr)) continue;
-          console.error(`game ${c.id} errored: ${lastErr}`);
-          results[i] = {
-            id: c.id,
-            iterations: cfg.maxIterations,
-            success: false,
-            tokens_used: 0,
-            error: lastErr,
-            transcript: [{ role: "user", text: `ERROR: ${lastErr}` }],
-          };
-        }
+      try {
+        results[i] = await runGame(cfg, c, runId);
+      } catch (err) {
+        // A crashed game counts as a failed game rather than aborting the whole run.
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`game ${c.id} errored: ${message}`);
+        results[i] = {
+          id: c.id,
+          iterations: cfg.maxIterations,
+          success: false,
+          tokens_used: 0,
+          error: message,
+          transcript: [{ role: "user", text: `ERROR: ${message}` }],
+        };
       }
     }
   }
