@@ -64,22 +64,18 @@ jobs:
             local max_logs="$2"
             local system_prompt_path="${agent_folder}/system-prompt.md"
 
-            payload=$(python3 -c "
-import json, os
-print(json.dumps({
-  'owner':               os.environ['OWNER'],
-  'repo':                os.environ['REPO'],
-  'agent_folder':        os.environ['AGENT_FOLDER'],
-  'system_prompt_path':  os.environ['SYSTEM_PROMPT_PATH'],
-  'skills_paths':        os.environ['SKILLS'],
-  'base_branch':         'main',
-  'github_token':        os.environ['GITHUB_TOKEN'],
-  'max_logs':            int(os.environ['MAX_LOGS']),
-}))" \
-              AGENT_FOLDER="$agent_folder" \
-              SYSTEM_PROMPT_PATH="$system_prompt_path" \
-              SKILLS="$skills" \
-              MAX_LOGS="$max_logs"
+            payload=$(jq -n \
+              --arg owner               "$OWNER" \
+              --arg repo                "$REPO" \
+              --arg agent_folder        "$agent_folder" \
+              --arg system_prompt_path  "$system_prompt_path" \
+              --arg skills_paths        "$skills" \
+              --arg base_branch         "main" \
+              --arg github_token        "$GITHUB_TOKEN" \
+              --argjson max_logs        "${max_logs:-5}" \
+              '{owner: $owner, repo: $repo, agent_folder: $agent_folder,
+                system_prompt_path: $system_prompt_path, skills_paths: $skills_paths,
+                base_branch: $base_branch, github_token: $github_token, max_logs: $max_logs}')
 
             http_status=$(curl -s -o /dev/null -w "%{http_code}" \
               -X POST "$N8N_WEBHOOK_URL" \
