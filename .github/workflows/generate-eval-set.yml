@@ -1,0 +1,77 @@
+name: Generate Eval Set
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "agents/*/system-prompt.md"
+
+# Least privilege: only needs to write back the generated eval-set.json.
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-eval-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for newly added agent folders
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # --diff-filter=A: only files added in this PR (not modified)
+          new_agents=$(git diff --name-only --diff-filter=A "$BASE_SHA" "$HEAD_SHA" \
+            | grep '^agents/[^/]*/system-prompt\.md$' \
+            | sed 's|/system-prompt\.md$||' \
+            || true)
+          if [ -z "$new_agents" ]; then
+            echo "No new agent folders detected — skipping."
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+          else
+            matrix=$(printf '%s\n' $new_agents | python3 -c 'import sys,json;print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+            echo "New agent folders: $matrix"
+            echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # actions/setup-node v4
+        if: steps.detect.outputs.matrix != '[]'
+        with:
+          node-version-file: agent-eval/.nvmrc
+          cache: "npm"
+          cache-dependency-path: agent-eval/package-lock.json
+
+      - name: Install dependencies
+        if: steps.detect.outputs.matrix != '[]'
+        run: npm ci
+        working-directory: agent-eval
+
+      - name: Generate eval sets
+        if: steps.detect.outputs.matrix != '[]'
+        working-directory: agent-eval
+        env:
+          GITHUB_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY:  ${{ secrets.OPENROUTER_API_KEY }}
+          OWNER:               ${{ github.repository_owner }}
+          REPO:                ${{ github.event.repository.name }}
+          BRANCH:              ${{ github.head_ref }}
+          EVAL_COUNT:          "10"
+          # Override model via repo secret EVAL_GEN_MODEL if needed; defaults to gpt-4.1-mini
+          EVAL_GEN_MODEL:      ${{ secrets.EVAL_GEN_MODEL || 'openai/gpt-5.4-mini' }}
+        run: |
+          set -euo pipefail
+          echo '${{ steps.detect.outputs.matrix }}' \
+            | python3 -c 'import sys,json;[print(f) for f in json.load(sys.stdin)]' \
+            | while IFS= read -r folder; do
+                echo "→ Generating eval set for $folder"
+                AGENT_FOLDER="$folder" npm run generate
+              done

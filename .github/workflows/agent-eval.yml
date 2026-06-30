@@ -7,10 +7,10 @@ on:
       - "skills/**"
   workflow_dispatch:
     inputs:
-      agent_folder:
-        description: "Agent folder to evaluate (e.g. agents/akinator)"
+      agent_name:
+        description: "Agent name to evaluate (e.g. akinator)"
         required: true
-        default: "agents/akinator"
+        default: "akinator"
       min_success_rate:
         description: "Minimum success rate for first-run pass"
         required: false
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.find.outputs.matrix }}
-      count: ${{ steps.find.outputs.count }}
+      count:  ${{ steps.find.outputs.count }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
         with:
@@ -46,21 +46,21 @@ jobs:
 
       - id: find
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          DISPATCH_FOLDER: ${{ github.event.inputs.agent_folder }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_NAME:    ${{ github.event_name }}
+          DISPATCH_NAME: ${{ github.event.inputs.agent_name }}
+          BASE_SHA:      ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA:      ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            matrix=$(printf '%s' "$DISPATCH_FOLDER" | python3 -c 'import sys,json;print(json.dumps([sys.stdin.read().strip()]))')
+            matrix=$(python3 -c "import json,sys,os; name=os.environ['DISPATCH_NAME'].strip(); print(json.dumps([f'agents/{name}']))")
           else
             changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true)
             matrix=$(printf '%s' "$changed" | python3 -c "import sys,json,re,os;changed=[l.strip() for l in sys.stdin if l.strip()];dirs={m.group(1) for l in changed for m in [re.match(r'^(agents/[^/]+)/',l)] if m};skills_changed=any(re.match(r'^skills/',l) for l in changed);all_agents={f'agents/{d}' for d in os.listdir('agents') if os.path.isdir(f'agents/{d}')} if skills_changed else set();print(json.dumps(sorted(dirs|all_agents)))")
           fi
           count=$(printf '%s' "$matrix" | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))')
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "count=$count"   >> "$GITHUB_OUTPUT"
           echo "Agent folders to evaluate: $matrix"
 
   eval:
@@ -74,28 +74,58 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
 
+      # Derive agent name (e.g. "akinator") and its uppercase form (e.g. "AKINATOR")
+      # used to resolve the agent-specific webhook secret.
+      - id: agent_id
+        run: |
+          name=$(echo "${{ matrix.agent_folder }}" | sed 's|^agents/||')
+          upper=$(echo "$name" | tr '[:lower:]-' '[:upper:]_')
+          echo "name=$name"   >> "$GITHUB_OUTPUT"
+          echo "upper=$upper" >> "$GITHUB_OUTPUT"
+
+      # Fail fast if the agent-specific webhook secret is not configured.
+      # Secret convention: N8N_AGENT_<AGENTNAME_UPPER>_WEBHOOK_URL
+      # e.g. agents/akinator → N8N_AGENT_AKINATOR_WEBHOOK_URL
+      - id: check_secret
+        env:
+          WEBHOOK_URL: ${{ secrets[format('N8N_AGENT_{0}_WEBHOOK_URL', steps.agent_id.outputs.upper)] }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "⚠️  Secret N8N_AGENT_${{ steps.agent_id.outputs.upper }}_WEBHOOK_URL is not set."
+            echo "   Add it under Settings → Secrets and variables → Actions, then re-run."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "url="      >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false"        >> "$GITHUB_OUTPUT"
+            printf 'url=%s\n' "$WEBHOOK_URL" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # actions/setup-node v4
+        if: steps.check_secret.outputs.skip == 'false'
         with:
           node-version-file: agent-eval/.nvmrc
           cache: "npm"
           cache-dependency-path: agent-eval/package-lock.json
 
-      - run: npm ci
+      - name: Install dependencies
+        if: steps.check_secret.outputs.skip == 'false'
+        run: npm ci
         working-directory: agent-eval
 
       - name: Run eval
+        if: steps.check_secret.outputs.skip == 'false'
         working-directory: agent-eval
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          N8N_AGENT_WEBHOOK_URL: ${{ secrets.N8N_AGENT_WEBHOOK_URL }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
-          AGENT_FOLDER: ${{ matrix.agent_folder }}
-          BRANCH: ${{ github.head_ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          MIN_SUCCESS_RATE: ${{ github.event.inputs.min_success_rate || '50' }}
-          MAX_AVG_ITERATIONS: ${{ github.event.inputs.max_avg_iterations || '30' }}
-          CONCURRENCY: ${{ github.event.inputs.concurrency || '3' }}
-          FAIL_ON_REGRESSION: "false"
+          GITHUB_TOKEN:         ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY:   ${{ secrets.OPENROUTER_API_KEY }}
+          N8N_AGENT_WEBHOOK_URL: ${{ steps.check_secret.outputs.url }}
+          OWNER:                ${{ github.repository_owner }}
+          REPO:                 ${{ github.event.repository.name }}
+          AGENT_FOLDER:         ${{ matrix.agent_folder }}
+          BRANCH:               ${{ github.head_ref || github.ref_name }}
+          PR_NUMBER:            ${{ github.event.pull_request.number }}
+          MIN_SUCCESS_RATE:     ${{ github.event.inputs.min_success_rate || '50' }}
+          MAX_AVG_ITERATIONS:   ${{ github.event.inputs.max_avg_iterations || '30' }}
+          CONCURRENCY:          ${{ github.event.inputs.concurrency || '3' }}
+          FAIL_ON_REGRESSION:   "false"
         run: npm run eval

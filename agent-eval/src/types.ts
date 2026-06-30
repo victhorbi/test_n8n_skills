@@ -46,8 +46,15 @@ export interface Usage {
   total_tokens: number;
 }
 
+/** Minimal GitHub credentials — accepted by all github.ts helpers. */
+export interface GithubCreds {
+  owner: string;
+  repo: string;
+  githubToken: string;
+}
+
 /** Fully-resolved run configuration (env + CLI merged). */
-export interface Config {
+export interface Config extends GithubCreds {
   owner: string;
   repo: string;
   agentFolder: string;

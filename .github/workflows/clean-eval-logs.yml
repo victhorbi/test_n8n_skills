@@ -1,0 +1,76 @@
+name: Clean Eval Logs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "agents/**/system-prompt.md"
+      - "skills/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: clean-eval-logs
+  cancel-in-progress: false  # let each cleanup finish; they're fast and sequential
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect affected agents and purge logs
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA:  ${{ github.event.after }}
+        run: |
+          set -euo pipefail
+
+          changed=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" || true)
+          echo "Changed files:"
+          echo "$changed"
+
+          affected=$(printf '%s' "$changed" | python3 -c "
+          import sys, json, re, os
+          changed = [l.strip() for l in sys.stdin if l.strip()]
+          dirs = {m.group(1) for l in changed for m in [re.match(r'^(agents/[^/]+)/', l)] if m}
+          skills_changed = any(re.match(r'^skills/', l) for l in changed)
+          all_agents = {f'agents/{d}' for d in os.listdir('agents') if os.path.isdir(f'agents/{d}')} if skills_changed else set()
+          print('\n'.join(sorted(dirs | all_agents)))
+          ")
+
+          if [ -z "$affected" ]; then
+            echo "No agent folders affected — nothing to clean."
+            exit 0
+          fi
+
+          echo "Affected agent folders:"
+          echo "$affected"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          cleaned=0
+          while IFS= read -r folder; do
+            [ -z "$folder" ] && continue
+            logs=$(git ls-files "${folder}/evals/logs/" 2>/dev/null || true)
+            if [ -n "$logs" ]; then
+              git rm -rf "${folder}/evals/logs/"
+              count=$(echo "$logs" | wc -l | tr -d ' ')
+              echo "Purged $count log file(s) for $folder"
+              cleaned=$((cleaned + 1))
+            else
+              echo "No logs to purge for $folder"
+            fi
+          done <<< "$affected"
+
+          if [ "$cleaned" -eq 0 ]; then
+            echo "No log files found — nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: purge stale eval logs after prompt/skills update [auto-clean]"
+          git push

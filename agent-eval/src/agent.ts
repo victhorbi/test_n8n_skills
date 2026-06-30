@@ -3,11 +3,13 @@ import type { Config } from "./types.js";
 export interface AgentCallInput {
   chatInput: string;
   sessionId: string;
-  /** Candidate system prompt under test. The n8n workflow must consume this for
-   *  prompt-level PRs to actually be evaluated (see README). */
-  systemPrompt?: string;
-  /** Git ref the agent should read its skill files from (PR head branch). */
-  ref?: string;
+  /** PR branch being tested. Omitted (null) when not in a PR context; the n8n
+   *  agent workflow falls back to `main` and fetches the system prompt from there. */
+  branch: string | null;
+  /** GitHub coordinates so the n8n agent can fetch system-prompt.md itself. */
+  owner: string;
+  repo: string;
+  agentFolder: string;
 }
 
 /**
@@ -15,7 +17,13 @@ export interface AgentCallInput {
  *
  * Contract (eval-core -> n8n):
  *   POST <N8N_AGENT_WEBHOOK_URL>
- *   { action: "sendMessage", chatInput, sessionId, systemPrompt?, ref? }
+ *   { action: "sendMessage", chatInput, sessionId, owner, repo, agentFolder, branch? }
+ *
+ * The n8n agent workflow is responsible for fetching its own system-prompt.md from
+ *   https://raw.githubusercontent.com/{owner}/{repo}/{branch ?? "main"}/{agentFolder}/system-prompt.md
+ * and stripping the QUALITY_SCORE header before use. `branch` is omitted when null;
+ * the workflow must default to "main" in that case.
+ *
  * Expected response JSON, first match wins:
  *   { output } | { text } | { response } | { data: { output } }
  *
@@ -27,9 +35,11 @@ export async function callAgent(cfg: Config, input: AgentCallInput): Promise<str
     action: "sendMessage",
     chatInput: input.chatInput,
     sessionId: input.sessionId,
+    owner: input.owner,
+    repo: input.repo,
+    agentFolder: input.agentFolder,
   };
-  if (input.systemPrompt !== undefined) payload.systemPrompt = input.systemPrompt;
-  if (input.ref !== undefined && input.ref !== null) payload.ref = input.ref;
+  if (input.branch !== null) payload.branch = input.branch;
 
   const res = await fetch(cfg.n8nAgentWebhookUrl, {
     method: "POST",

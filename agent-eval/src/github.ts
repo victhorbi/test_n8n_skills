@@ -1,4 +1,4 @@
-import type { Config } from "./types.js";
+import type { GithubCreds } from "./types.js";
 
 const API = "https://api.github.com";
 
@@ -35,7 +35,7 @@ export interface FileContent {
 
 /** GET /repos/{owner}/{repo}/contents/{path}?ref=… */
 export async function getContent(
-  cfg: Config,
+  cfg: GithubCreds,
   path: string,
   ref: string | null,
 ): Promise<FileContent> {
@@ -55,7 +55,7 @@ export async function getContent(
  * not the agent folder. (The original n8n flow PUT to the folder — that was a bug.)
  */
 export async function putContent(
-  cfg: Config,
+  cfg: GithubCreds,
   opts: { path: string; content: string; message: string; branch: string | null; sha?: string },
 ): Promise<void> {
   const url = `${API}/repos/${cfg.owner}/${cfg.repo}/contents/${opts.path}`;
@@ -72,7 +72,7 @@ export async function putContent(
 }
 
 /** Return the GraphQL node_id for a pull request (needed for the ready-for-review mutation). */
-export async function getPullRequestNodeId(cfg: Config, prNumber: number): Promise<string> {
+export async function getPullRequestNodeId(cfg: GithubCreds, prNumber: number): Promise<string> {
   const url = `${API}/repos/${cfg.owner}/${cfg.repo}/pulls/${prNumber}`;
   const res = await ghFetch(cfg.githubToken, url);
   if (!res.ok) {
@@ -87,7 +87,7 @@ export async function getPullRequestNodeId(cfg: Config, prNumber: number): Promi
  * This is GraphQL-only — the REST update-PR endpoint does NOT accept a `draft` field,
  * which is why the original n8n PATCH {draft:false} was a silent no-op.
  */
-export async function markPullRequestReady(cfg: Config, prNumber: number): Promise<void> {
+export async function markPullRequestReady(cfg: GithubCreds, prNumber: number): Promise<void> {
   const nodeId = await getPullRequestNodeId(cfg, prNumber);
   const query = `mutation($id: ID!) {
     markPullRequestReadyForReview(input: { pullRequestId: $id }) {

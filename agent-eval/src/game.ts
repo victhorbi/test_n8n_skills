@@ -20,7 +20,6 @@ const SUCCESS_REGEX = /succeed|success|satisfied/i;
 export async function runGame(
   cfg: Config,
   evalCase: EvalCase,
-  candidatePrompt: string,
   runId: string,
 ): Promise<GameResult> {
   const sessionId = `${runId}:${evalCase.id}`;
@@ -36,8 +35,10 @@ export async function runGame(
     const agentText = await callAgent(cfg, {
       chatInput,
       sessionId,
-      systemPrompt: candidatePrompt,
-      ref: cfg.branch ?? undefined,
+      branch: cfg.branch,
+      owner: cfg.owner,
+      repo: cfg.repo,
+      agentFolder: cfg.agentFolder,
     });
     transcript.push({ role: "agent", text: agentText });
 
@@ -68,7 +69,6 @@ export async function runGame(
 export async function runGames(
   cfg: Config,
   cases: EvalCase[],
-  candidatePrompt: string,
   runId: string,
 ): Promise<GameResult[]> {
   const results: GameResult[] = new Array(cases.length);
@@ -79,7 +79,7 @@ export async function runGames(
       const i = cursor++;
       const c = cases[i];
       try {
-        results[i] = await runGame(cfg, c, candidatePrompt, runId);
+        results[i] = await runGame(cfg, c, runId);
       } catch (err) {
         // A crashed game counts as a failed game rather than aborting the whole run.
         const message = err instanceof Error ? err.message : String(err);
