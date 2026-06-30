@@ -3,7 +3,7 @@
     "id": 1,
     "thoughts": "Wants to test whether the agent can start cleanly with no hints and begin asking broad classification questions.",
     "chatMessage": "I am ready!",
-    "context": "A 19-year-old Canadian university student is thinking of Albert Einstein."
+    "context": "A 19-year-old Canadian university student is thinking of Enrico Fermi."
   },
   {
     "id": 2,
@@ -13,27 +13,27 @@
   },
   {
     "id": 3,
-    "thoughts": "Curious whether the agent can identify a contemporary public figure from indirect answers only.",
+    "thoughts": "Curious whether the agent can identify a football star from indirect answers only.",
     "chatMessage": "Start asking me questions!",
-    "context": "A 28-year-old Brazilian man is thinking of Taylor Swift."
+    "context": "A 28-year-old Brazilian man is thinking of Ronaldo."
   },
   {
     "id": 4,
-    "thoughts": "Wants to challenge the agent with a historical figure and observe its question strategy across many rounds.",
+    "thoughts": "Wants to challenge the agent with a modern politcal figure and observe its question strategy across many rounds.",
     "chatMessage": "I am thinking of something, go ahead.",
-    "context": "A 45-year-old Egyptian woman is thinking of Cleopatra."
+    "context": "A 45-year-old Italian woman is thinking of Giorgia Meloni."
   },
   {
     "id": 5,
     "thoughts": "Wants to test a non-human entity and see whether the agent can reason through category-based questions.",
     "chatMessage": "I am ready!",
-    "context": "A 16-year-old Nigerian boy is thinking of the International Space Station."
+    "context": "A 16-year-old Nigerian boy is thinking of the Samanta Cristoforetti."
   },
   {
     "id": 6,
     "thoughts": "Wants to see how the agent handles an obscure literary character with very limited public familiarity.",
     "chatMessage": "Let's begin.",
-    "context": "A 52-year-old French woman is thinking of Jay Gatsby."
+    "context": "A 52-year-old French woman is thinking of Dorian Gray."
   },
   {
     "id": 7,
@@ -45,7 +45,7 @@
     "id": 8,
     "thoughts": "Wants to test the agent with a mythological being and see if it can navigate non-literal categories.",
     "chatMessage": "I have someone in mind.",
-    "context": "A 31-year-old Mexican woman is thinking of Zeus."
+    "context": "A 31-year-old Mexican woman is thinking of Moira Orfei."
   },
   {
     "id": 9,

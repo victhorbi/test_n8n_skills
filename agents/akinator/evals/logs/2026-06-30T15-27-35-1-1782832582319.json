@@ -1,0 +1,1815 @@
+{
+  "run_id": "1-1782832582319",
+  "branch": "victhorbi-patch-1",
+  "pr_number": 1,
+  "agent_folder": "agents/akinator",
+  "evaluated_at": "2026-06-30T15:27:35.763Z",
+  "stats": {
+    "model": "deepseek/deepseek-v4-flash",
+    "total_games": 10,
+    "valid_games": 10,
+    "errored_games": 0,
+    "successful_games": 8,
+    "success_rate": 80,
+    "avg_iterations": 21.4,
+    "total_tokens": 197903,
+    "tokens_per_game": 19790,
+    "evaluated_at": "2026-06-30T15:27:35.763Z",
+    "first_run": false,
+    "thresholds_used": null
+  },
+  "games": [
+    {
+      "id": 1,
+      "iterations": 17,
+      "success": true,
+      "tokens_used": 7576,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "All the skill files have been loaded successfully.\n\nWelcome! Let's start the game. Think of a character, and I will try to guess who it is by asking questions. Please answer each question with one of: Yes, No, Don't know, Probably, or Probably not.\n\nAre you ready for my first question?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Great! Let's get started.\n\nIs your character from a video game?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered the candidate list to exclude video game characters.\n\nNow, let me formulate the next question.\n\nIs your character a human?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have narrowed the list to human characters.\n\nHere's my next question:\n\nIs your character a real person?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered to real human characters.\n\nIs your character currently alive?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered to real human characters who are not currently alive.\n\nNext question:\n\nIs your character known for achievements in politics?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered out candidates strongly linked to politics.\n\nNext question:\n\nIs your character known for contributions in the arts, such as painting, music, or literature?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered out candidates strongly linked to the arts.\n\nNext question:\n\nIs your character primarily known for achievements in science or technology?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have refined the candidate list to those primarily known for achievements in science or technology.\n\nNext question:\n\nDid your character live in the 20th century?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have narrowed the candidate list to those in science or technology who lived in the 20th century.\n\nNext question:\n\nWas your character a man?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered the candidates to 20th-century male scientists or technologists.\n\nNext question:\n\nDid your character contribute significantly to physics?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have refined the list to male 20th-century scientists with significant contributions to physics.\n\nNext question:\n\nDid your character win a Nobel Prize during their lifetime?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have narrowed the candidates to male 20th-century physicists who won a Nobel Prize.\n\nI am close to making a guess. Let me double check.\n\nIs your character Albert Einstein?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your response.\n\nNext question:\n\nDid your character contribute to the development of quantum mechanics?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "I have filtered candidates to Nobel-winning male 20th-century physicists involved in quantum mechanics besides Einstein.\n\nNext question:\n\nDid your character work extensively on nuclear physics?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have refined the candidates to Nobel-winning male 20th-century physicists with significant contributions to nuclear physics and quantum mechanics.\n\nIs your character Enrico Fermi?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Great! I have successfully guessed your character as Enrico Fermi.\n\nWould you like to play another round or ask anything else?"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "iterations": 40,
+      "success": false,
+      "tokens_used": 46794,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "All the necessary game skills are loaded and ready.\n\nLet's start the game! Think of a character, and I'll try to guess by asking you questions. \n\nHere is my first question for you:\n\nIs your character from a video game?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Great! Let me update my candidate list based on your answer.\n\nIs your character male?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Got it! Let me refine the candidate list based on your answer.\n\nIs your character from a TV series?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll update the candidate list accordingly without removing anyone, since you said \"Probably.\"\n\nIs your character real (a real person)?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer. I'll update the candidate list accordingly.\n\nIs your character animated?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Let me refine the candidates.\n\nIs your character from a cartoon series specifically targeted at children?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Updating my candidate list based on your answer.\n\nIs your character from a show that originally aired before the year 2000?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! Let me refine the candidate list.\n\nIs your character anthropomorphic (an animal or object with human traits)?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it! I am narrowing down the candidate list based on your answer.\n\nIs your character a main protagonist in their show?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! I will now evaluate if I have enough information to make a guess or if I should ask another question.\n\nIs your character from a comedy series?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll consider that in my candidate list.\n\nLet me analyze the candidates now to see if I can make a guess or if I need to ask another question."
+        },
+        {
+          "role": "user",
+          "text": "I'm ready for your guess or next question."
+        },
+        {
+          "role": "agent",
+          "text": "I have reached a conclusion.\n\nIs your character Doug Funnie?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for letting me know.\n\nLet me ask another question to narrow down further.\n\nIs your character known for wearing a hat?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! I'll refine the candidate list based on your answer.\n\nIs your character from a show primarily set in a school environment?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll update the candidates list accordingly.\n\nIs your character known for being particularly smart or intellectual?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Let me refine the candidate list based on your answer.\n\nIs your character part of a show that features a group of friends as primary characters?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! I'll further narrow down the candidate list.\n\nIs your character from a show that originally aired on Nickelodeon?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll adjust my candidate list accordingly.\n\nIs your character from a show that originally aired on Cartoon Network?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Got it, I'll refine the candidates accordingly.\n\nIs your character from a show that aired primarily on Disney Channel or Disney XD?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll narrow down the candidates accordingly.\n\nIs your character known for being physically strong or athletic?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! I'm narrowing down the candidates with your input.\n\nIs your character a member of a family in their show?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll update the candidate list accordingly.\n\nIs your character from an animated series created by Hanna-Barbera?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you. I'll refine the candidates further.\n\nIs your character from an animated series mainly targeted at preteens (older than children, younger than teens)?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer. I'll update the candidate list with that in mind.\n\nIs your character primarily known for being funny or comedic?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll consider that in refining the candidates.\n\nIs your character featured in a show that involves fantasy or magical elements?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! I'll use your answer to refine the candidate list further.\n\nIs your character a talking animal or creature in the show?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll update the candidates accordingly.\n\nIs your character a human with magical powers or abilities?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response! I'll keep refining the candidates.\n\nIs your character from a show that is set primarily in a school or academy for magic or special abilities?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! Narrowing down the candidate list.\n\nIs your character often accompanied by a sidekick or close companion in the show?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer. I'll update my candidate list accordingly.\n\nIs your character from an animated series primarily produced in the United States?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing down the candidates further.\n\nIs your character from a British or European animated series?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll keep refining the candidate list.\n\nIs your character from an anime (Japanese animated series)?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! That's very helpful.\n\nIs your character from a shonen anime (targeted primarily toward young male audience)?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll refine the candidate list accordingly.\n\nIs your character from a slice-of-life or drama anime rather than action or adventure?\nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Narrowing the candidate list further.\n\nIs your character a student in their series?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer!\n\nI am analyzing the narrowed-down candidates to see if I can make a guess or need to ask another question to distinguish.\n\nPlease hold on a moment..."
+        },
+        {
+          "role": "user",
+          "text": "I have enough information to make a guess.\n\nIs your character Doraemon?"
+        },
+        {
+          "role": "agent",
+          "text": "Is your character Nobita Nobi?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for letting me know.\n\nLet me ask another question to narrow down further.\n\nIs your character known for having a catchphrase or distinctive phrase they frequently say?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Probably"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! I'll update the candidate list accordingly.\n\nIs your character part of an anime series that includes elements of comedy and everyday life situations?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! I'll refine the candidates based on that.\n\nIs your character known to be clumsy or easily getting into trouble?  \nOptions: Yes / No / Don't know / Probably / Probably not\n\nYour answer?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "iterations": 20,
+      "success": true,
+      "tokens_used": 15570,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "Great! Let's start the game.\n\nQuestion 1:\nIs your character from a video game?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "I have registered your answer \"No\" to the question \"Is your character from a video game?\" and updated the list of possible candidates accordingly.\n\nNext, I will analyze the updated candidate list and choose the most efficient question to narrow down your character.\n\nQuestion 2:\nIs your character a human?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Noted your answer \"Yes\" to the question \"Is your character a human?\" I am refining the list of possible candidates.\n\nNext question to narrow down the search:\n\nIs your character male?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Got it, your character is male.\n\nNext question:\n\nIs your character from a movie?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Noted, your character is not from a movie.\n\nNext question:\n\nIs your character real (not fictional)?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! Since your character is a real male human and not from a movie or video game, I'll refine the list accordingly.\n\nNext question:\n\nIs your character a historical figure?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! Your character is a real male human, not from movies or games, and is not a historical figure.\n\nNext question:\n\nIs your character primarily known for their work in sports?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for confirming your character is known for their work in sports.\n\nNext question:\n\nIs your character a professional football (soccer) player?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer!\n\nNext question:\n\nIs your character currently an active player?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Understood, your character is a retired professional football (soccer) player.\n\nNext question:\n\nDid your character primarily play as a forward (attacker)?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer!\n\nNext question:\n\nDid your character play for a European football club for most of their career?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer!\n\nNext question:\n\nIs your character Pelé?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer! Since it's not Pelé, I will continue narrowing down the options.\n\nNext question:\n\nDid your character play for FC Barcelona?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer!\n\nNext question:\n\nDid your character wear the number 10 jersey most of the time at FC Barcelona?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it, your character did not wear the number 10 jersey most of the time at FC Barcelona.\n\nNext question:\n\nDid your character play during the 1990s?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer!\n\nNext question:\n\nIs your character Ronald Koeman?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer!\n\nNext question:\n\nDid your character primarily play as a defender at FC Barcelona?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer!\n\nNext question:\n\nDid your character primarily play as a midfielder at FC Barcelona?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Based on this information, your character was a forward at FC Barcelona in the 1990s, did not wear number 10, and was not a midfielder or defender.\n\nNext question:\n\nDid your character play alongside Hristo Stoichkov at FC Barcelona?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Based on your previous answers, your character is a Brazilian male, real, known for sports, a retired professional footballer, forward, played for Barcelona in the 1990s, wore number 9 typically, not number 10, and not Pelé. That strongly points to Ronaldo Luís Nazário de Lima (Ronaldo). He did play alongside Hristo Stoichkov at Barcelona during the 1996-1997 season.\n\nSo my answer is: **Yes**"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the confirmation!\n\nBased on the information so far, I have narrowed down the candidate list significantly.\n\nNow, I have reached a confidence threshold to make a guess.\n\nIs your character Ronaldo Luís Nazário de Lima (commonly known as Ronaldo)?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes\n\nsucceed"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "iterations": 16,
+      "success": true,
+      "tokens_used": 8890,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "I am ready to play! I will start by asking a question to narrow down the possible candidates you might be thinking of.\n\nIs your character a human? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have noted that your character is a human. Let me continue to narrow down the list.\n\nIs your character male? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it, your character is not male. Let me ask another question to refine the pool.\n\nIs your character a fictional character? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Understood, your character is not fictional. Here's the next question:\n\nIs your character a living person? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the answer. Let me continue:\n\nIs your character famous for their work in entertainment? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response. Here's the next question:\n\nIs your character known for their contributions to science or technology? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you. Let me ask another question to narrow it down further:\n\nIs your character known for their involvement in politics? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer. Next question:\n\nIs your character currently holding a political office? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Is your character a head of state or government? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have identified we are down to a very small candidate pool. I will verify confidence to decide if I should guess or ask a final narrowing question.\n\nIs your character a female head of state or government currently serving in their role? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have reached a conclusion. Is your character Jacinda Ardern?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer. I will ask one final question to help narrow down the choice.\n\nIs your character the head of state or government of a country in Europe? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have a high confidence now.\n\nIs your character Ursula von der Leyen?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer. I will ask another clarifying question.\n\nIs your character the head of state or government of the United Kingdom? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response. Let me ask another narrowing question:\n\nIs your character the head of state or government of Germany? (Please answer: Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "I seem to be out of strong candidate matches for a female current head of state or government in Europe based on your answers. I want to acknowledge this gap.\n\nI am impressed! You have stumped me. Who were you thinking of?"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "iterations": 12,
+      "success": true,
+      "tokens_used": 10426,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "All systems are ready! We can now start the game. I will ask you questions and you can respond with one of these answers: Yes, No, Don't know, Probably, or Probably not.\n\nLet's begin! \n\nIs your character from a video game?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer. \n\nIs your character from a movie?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! \n\nIs your character a real person?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it! \n\nIs your character from a TV show?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer.\n\nIs your character from a book?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you.\n\nIs your character from a comic or graphic novel?"
+        },
+        {
+          "role": "user",
+          "text": "Probablynot."
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response.\n\nIs your character from mythology or folklore?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks!\n\nIs your character an animal or non-human creature?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer.\n\nIs your character a fictional creature often found in fantasy settings (like dragons, elves, or dwarfs)?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not."
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the answer.\n\nIs your character an alien or extraterrestrial being?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you.\n\nIs your character from a science fiction movie?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response.\n\nIs your character from a science fiction TV show?"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "iterations": 14,
+      "success": true,
+      "tokens_used": 10642,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "I have loaded the necessary skills to play the game. Let's start!\n\nI will begin by asking a question to try and guess the character you are thinking of.\n\nQuestion: Is your character from a video game?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "I have received your answer \"No\" to the question \"Is your character from a video game?\".\n\nI will update the candidate list by removing all video game characters from consideration.\n\nNext, I will analyze the remaining candidates and select the most efficient question to ask you next.\n\nQuestion: Is your character a real person?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Noted, your character is not from a video game and is not a real person.\n\nI will now update the candidate list accordingly, filtering out real persons.\n\nNext, I will calculate the best question to divide the remaining list of candidates.\n\nQuestion: Is your character from a movie?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Probably not."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"Probably not\" to the question \"Is your character from a movie?\"\n\nI will update the candidate list considering this response and avoid removing candidates based strictly on a \"Probably not\" answer.\n\nNow, I will analyze the traits of remaining candidates and decide the next best question.\n\nQuestion: Is your character from a TV series?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"No\" to the question \"Is your character from a TV series?\"\n\nI will remove all candidates from TV series from the active candidate list.\n\nNow, I will analyze the remaining candidates to choose the next best question.\n\nQuestion: Is your character from an animated show or cartoon?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"No\" to the question \"Is your character from an animated show or cartoon?\"\n\nI will update the candidate list to exclude animated show or cartoon characters.\n\nNext, I will analyze the remaining candidates and select the next best question to narrow down further.\n\nQuestion: Is your character from a book or literary work?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"Yes\" to the question \"Is your character from a book or literary work?\"\n\nI will update the candidate list to include only characters from books or literary works.\n\nNext, I will analyze the remaining candidates and select the next best question.\n\nQuestion: Is your character from a fantasy genre book?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"No\" to the question \"Is your character from a fantasy genre book?\"\n\nI will update the candidate list to exclude characters from the fantasy genre.\n\nNow, I will analyze the remaining candidates and select the most efficient next question.\n\nQuestion: Is your character from a science fiction book?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"No\" to the question \"Is your character from a science fiction book?\"\n\nI will update the candidate list to exclude science fiction characters.\n\nNext, I will analyze the traits of remaining candidates and pick the next best question.\n\nQuestion: Is your character from a mystery or detective genre book?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"No\" to the question \"Is your character from a mystery or detective genre book?\"\n\nUpdating the candidate list accordingly.\n\nNext, I will analyze the remaining characters and select the next question.\n\nQuestion: Is your character from a historical or biographical book?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"No\" to the question \"Is your character from a historical or biographical book?\"\n\nI will update the candidate list to remove characters from historical or biographical books.\n\nNext, I will analyze the remaining candidates and select the next best question.\n\nQuestion: Is your character a protagonist or main character in their book?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"Yes\" to the question \"Is your character a protagonist or main character in their book?\"\n\nI will update the candidate list accordingly to focus on protagonists or main characters.\n\nNext, I will analyze the remaining candidates to decide the next best question.\n\nQuestion: Is your character from a classic literature book (published over 50 years ago)?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "You answered \"Yes\" to the question \"Is your character from a classic literature book (published over 50 years ago)?\"\n\nI will update the candidate list accordingly to focus on characters from classic literature.\n\nCurrently, the candidate list has been narrowed down significantly.\n\nI will check if I have a strong enough candidate to guess or if I should ask one more question.\n\nOne moment please."
+        },
+        {
+          "role": "user",
+          "text": "I have enough information to make a guess.\n\nIs your character Dorian Gray from \"The Picture of Dorian Gray\" by Oscar Wilde?"
+        },
+        {
+          "role": "agent",
+          "text": "I have reached a conclusion. Is your character Dorian Gray from \"The Picture of Dorian Gray\" by Oscar Wilde?"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "iterations": 40,
+      "success": false,
+      "tokens_used": 34117,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "I am ready to play! To start, I'll ask a question to narrow down the character you're thinking of. Please answer with Yes, No, Don't know, Probably, or Probably not.\n\nHere is the first question:\nIs your character a real person?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer! Let me process that to narrow down the possibilities.\n\nIs your character known for being in the entertainment industry (movies, music, TV, etc.)?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Let me update the possibilities based on your answer.\n\nDoes your character have a notable role in politics or government?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it! Let's narrow down further.\n\nIs your character primarily known for achievements in sports or athletics?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing down further:\n\nIs your character primarily known for contributions to science, technology, or academia?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! To narrow down further:\n\nIs your character a historical figure (lived before the 20th century)?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it! Here's the next question:\n\nIs your character primarily known for work in computer science or technology innovation?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for that. Narrowing down further:\n\nIs your character primarily associated with medicine or healthcare?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Understood. Next question to narrow it down:\n\nIs your character known for contributions in physics or mathematics?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing down further:\n\nIs your character famous for work related to the theory of relativity?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Let's keep narrowing down.\n\nIs your character known for significant work in pure mathematics (e.g., number theory, algebra, geometry)?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Let's get more specific.\n\nIs your character primarily known for contributions to quantum mechanics or atomic theory?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing further:\n\nIs your character known for work in applied physics or engineering?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answers. Let's narrow down further:\n\nIs your character primarily known for contributions in astronomy or cosmology?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Based on the information so far, here is what I am thinking:\n- Real person\n- Not entertainment, politics, or sports\n- Contributions in science, technology, or academia\n- Not historical (not pre-20th century)\n- Not primarily computer science, medicine, quantum mechanics, applied physics, or astronomy\n- Yes to physics or mathematics, but probably not relativity or pure math\n\nNext question: Is your character known for work in chemistry or materials science?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for that. Let me try to refine further.\n\nIs your character known primarily for contributions to engineering disciplines like electrical, mechanical, or civil engineering?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing further:\n\nIs your character recognized for significant contributions to biology or life sciences?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Here's the next question to narrow down:\n\nIs your character known for contributions in the field of environmental science or earth sciences?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answers. Let me recap what I have so far:\n- Real person\n- Not linked with entertainment, politics, sports\n- Contributions in science/technology/academia but uncertain about the specific branch\n- Related to physics or mathematics but not relativity, pure math, quantum mechanics, applied physics, or astronomy\n- Probably not chemistry, engineering, biology, environmental or earth sciences\n\nIs your character a Nobel Prize laureate or otherwise highly awarded in their scientific field?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! I'll continue narrowing down:\n\nIs your character primarily known for work in theoretical physics (excluding relativity and quantum mechanics)?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing down further:\n\nIs your character associated with experimental physics or empirical research?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Here's the next question:\n\nIs your character known for discoveries related to subatomic particles or nuclear physics?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Narrowing down more:\n\nIs your character known for work related to optics or the study of light?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Based on your answers, I believe I am close.\n\nI have reached a conclusion. Is your character Albert Michelson?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer. Let's continue narrowing down then.\n\nIs your character associated with the invention or significant improvement of optical instruments?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Here's another question to narrow it down:\n\nIs your character known for contributions related to the wave or particle nature of light?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answers. Narrowing further:\n\nIs your character primarily recognized for discovering the photoelectric effect?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Here's the next question:\n\nIs your character known for significant work on wave optics or interference patterns of light?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! With that in mind:\n\nIs your character Thomas Young?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response. Let's continue narrowing down.\n\nIs your character known for work related to polarization of light?"
+        },
+        {
+          "role": "user",
+          "text": "Probably yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Let me try to make a guess:\n\nIs your character Augustin-Jean Fresnel?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer! Let me ask another narrowing question:\n\nIs your character French?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Next question:\n\nIs your character British?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Let's keep narrowing down.\n\nIs your character German?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Next question:\n\nIs your character American?"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Let's narrow down geographically:\n\nIs your character from an Eastern European country?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Next question:\n\nIs your character from an Asian country?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Narrowing down further:\n\nIs your character Japanese?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks! Next question:\n\nIs your character Chinese?"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Next question:\n\nIs your character Indian?"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "iterations": 17,
+      "success": true,
+      "tokens_used": 31612,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "I have loaded the instructions for managing the game's candidate states, calculating the best questions to ask, checking if we can make a confident guess, and handling unknown characters.\n\nYou have someone in mind. To start playing, I will ask you a binary question to narrow down the possible candidates.\n\nLet me begin:\n\nIs your character from a video game? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"Probably not.\"\n\nI will update the candidate list accordingly and then decide the best next question to ask you to narrow down the character.\n\nNext question:\nIs your character a real person? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Noted, your character is probably not from a video game and is not a real person.\n\nI will update the candidate list accordingly and continue narrowing down.\n\nNext question:\nIs your character from a movie? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Got it, your character is probably not from a video game, is not a real person, and is not from a movie.\n\nNext question:\nIs your character a fictional character from a book or literature? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"Probably not.\"\n\nThe information so far suggests your character is likely fictional but not from video games, real life, movies, or books.\n\nNext question:\nIs your character from a TV series or a cartoon? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer. So your character is probably not from video games, not real, not from a movie or TV series/cartoon, and probably not from books or literature either.\n\nNext question:\nIs your character associated with mythology or folklore? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Your character is associated with mythology or folklore.\n\nNext question:\nIs your character from Greek mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"No.\"\n\nYour character is associated with mythology or folklore but not from Greek mythology.\n\nNext question:\nIs your character from Norse mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"No.\"\n\nYour character is associated with mythology or folklore, but not from Greek or Norse mythology.\n\nNext question:\nIs your character from Egyptian mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"No.\"\n\nYour character is associated with mythology or folklore but is not from Greek, Norse, or Egyptian mythology.\n\nNext question:\nIs your character from Asian mythology (e.g., Chinese, Japanese, Indian)? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"No.\"\n\nYour character is associated with mythology or folklore, but not from Greek, Norse, Egyptian, or Asian mythology.\n\nNext question:\nIs your character from Celtic or Irish mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"No.\"\n\nYour character is associated with mythology or folklore, but not from Greek, Norse, Egyptian, Asian, or Celtic/Irish mythology.\n\nNext question:\nIs your character from Native American or Indigenous mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Your character is associated with Native American or Indigenous mythology.\n\nNext question:\nIs your character a deity or god in Native American mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"No.\"\n\nYour character is associated with Native American or Indigenous mythology but is not a deity or god.\n\nNext question:\nIs your character an animal or spirit figure in Native American mythology? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you! Your character is an animal or spirit figure in Native American mythology.\n\nNext question:\nIs your character specifically known as a trickster figure? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer \"Yes.\"\n\nYour character is an animal or spirit figure in Native American mythology and is known as a trickster.\n\nNext step:\nI have narrowed the candidates significantly. Let me consider if I have enough confidence to guess.\n\nI have reached a conclusion. Is your character Raven? (Yes / No / Don't know / Probably / Probably not)"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Fantastic! I'm glad I guessed correctly — your character is Raven from Native American mythology, known as a trickster spirit.\n\nWould you like to play another round or ask me anything else?"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "iterations": 13,
+      "success": true,
+      "tokens_used": 7364,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "I am ready to proceed with making a guess based on your previous input. However, I need some context about the current game state or the answers you've provided so far. Could you please share the last question asked and your answer to it or any other clues from this game session? This will help me make the best next move."
+        },
+        {
+          "role": "user",
+          "text": "Sure, this is a new game. I'm thinking of something that is a product or brand. You can start asking yes/no questions to figure out what it is."
+        },
+        {
+          "role": "agent",
+          "text": "Great! Since this is a new game and you have a product or brand in mind, I'll start by narrowing down the possibilities.\n\nQuestion: Is the product or brand primarily associated with technology?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer!\n\nSince the product or brand is associated with technology, I'll continue narrowing down.\n\nQuestion: Is this technology product or brand primarily related to consumer electronics?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the response!\n\nQuestion: Is this brand mainly known for producing smartphones?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the answer!\n\nNext question: Is this brand primarily known for producing computers or laptops?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you!\n\nQuestion: Is this brand known for making software or digital services rather than physical products?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for the answer!\n\nQuestion: Is this brand primarily known for producing consumer electronic devices like TVs, audio equipment, or home appliances?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Probably not"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for the response!\n\nQuestion: Is this brand associated with gaming products or gaming hardware?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the answer!\n\nQuestion: Is this brand well-known for making gaming consoles?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "Given your answers, I am narrowing down the candidates.\n\nQuestion: Is your character the brand \"Sony,\" known for the PlayStation console?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your response!\n\nQuestion: Is your character the brand \"Microsoft,\" known for the Xbox console?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for the answer!\n\nQuestion: Is your character the brand \"Nintendo,\" known for the Nintendo Switch and other gaming consoles?  \nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes"
+        },
+        {
+          "role": "agent",
+          "text": "I have reached a conclusion. Is your character the brand \"Nintendo\"?"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "iterations": 25,
+      "success": true,
+      "tokens_used": 24912,
+      "transcript": [
+        {
+          "role": "agent",
+          "text": "All skill files are loaded and ready.\n\nYou said you are set. Would you like to start the game? If so, I will begin by asking a question to guess your character!"
+        },
+        {
+          "role": "user",
+          "text": "Yes, I'm ready. Please start."
+        },
+        {
+          "role": "agent",
+          "text": "I will start by initializing the candidate list and then ask the first question to narrow down the possibilities.\n\nQuestion: Is your character from a video game?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer.\n\nI will update the candidate list by removing all video game characters and then select the most efficient question to ask next to narrow down further.\n\nNext question: Is your character from a movie?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Got it.\n\nI will now filter out movie characters and then choose the most effective question to narrow down the candidates further.\n\nNext question: Is your character a real person?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your response.\n\nFiltering for real people only in the candidate list. I will now calculate the best question to narrow down further.\n\nNext question: Is your character currently alive?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Understood.\n\nFiltering candidates to those real people who are no longer alive. Now I will select the next best question to narrow down the possibilities.\n\nNext question: Was your character primarily known for achievements in politics?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for the answer.\n\nFiltering candidates to deceased real people known for achievements in politics. Next, I will choose the most effective question to further narrow down.\n\nNext question: Was your character a head of state or government?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer.\n\nFiltering to deceased real people who were heads of state or government. I will check the candidate list size and confidence.\n\nIf the list is down to 3 or fewer candidates or if the top candidate's probability is high, I may attempt a guess or ask a final narrowing question.\n\nChecking now..."
+        },
+        {
+          "role": "user",
+          "text": "It sounds like you're narrowing it down well. Let me know if you need to ask another question or if you're ready to guess."
+        },
+        {
+          "role": "agent",
+          "text": "The candidate list is now very small, and the top candidate has a high match strength.\n\nI am ready to make a guess.\n\nI have reached a conclusion. Is your character Winston Churchill?"
+        },
+        {
+          "role": "user",
+          "text": "No, that's not correct."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for letting me know.\n\nI will ask one final narrowing question to distinguish among the remaining candidates before making another guess.\n\nNext question: Was your character a leader during World War II?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your response.\n\nFiltering candidates to those who were not leaders during World War II. I will now check if the confidence is high enough for a guess or if further questioning is needed.\n\nBased on the remaining candidates, I am ready to make another guess.\n\nI have reached a conclusion. Is your character Abraham Lincoln?"
+        },
+        {
+          "role": "user",
+          "text": "No, that's not correct either."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer.\n\nSince the confidence is still not high enough or the match is unclear, I will ask another question to continue narrowing down.\n\nNext question: Was your character a leader in the 19th century?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you.\n\nFiltering candidates further to those who were not leaders in the 19th century. I will now check the candidate list size and confidence again.\n\nGiven the information so far, would you like me to keep asking questions to narrow down or make a guess based on the current data?"
+        },
+        {
+          "role": "user",
+          "text": "I think it would be best if you continue asking questions to narrow down further."
+        },
+        {
+          "role": "agent",
+          "text": "Understood. I will find the next most informative question to help distinguish the remaining candidates.\n\nNext question: Was your character a leader in the 20th century (excluding World War II period)?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for the answer.\n\nFocusing on 20th-century leaders (excluding World War II period). I will now refine the candidate list further.\n\nNext question: Was your character a leader in the United States?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your response.\n\nFiltering candidates to 20th-century leaders outside the United States. I will select the next best question to continue narrowing down.\n\nNext question: Was your character a leader in Europe?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for your answer.\n\nI will filter the candidate list to 20th-century leaders who were not from the United States or Europe. \n\nNext question: Was your character a leader in Asia?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "Yes."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer.\n\nNarrowing down to 20th-century leaders from Asia. I will now select the most informative next question.\n\nNext question: Did your character hold office after 1950?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you.\n\nFiltering candidates to 20th-century Asian leaders who held office before 1950. I will now find the best question to narrow down further.\n\nNext question: Was your character a leader of China?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your response.\n\nNarrowing down to 20th-century Asian leaders who held office before 1950 and were not leaders of China.\n\nNext question: Was your character a leader of Japan?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer.\n\nFiltering candidates further: 20th-century Asian leaders who held office before 1950 and were not leaders of China or Japan.\n\nNext question: Was your character a leader of India?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you.\n\nFiltering candidates to 20th-century Asian leaders who held office before 1950 and were not leaders of China, Japan, or India.\n\nNext question: Was your character a leader of Korea?\nOptions: [Yes / No / Don't know / Probably / Probably not]"
+        },
+        {
+          "role": "user",
+          "text": "No."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your answer.\n\nFiltering candidates to 20th-century Asian leaders who held office before 1950 and were not leaders of China, Japan, India, or Korea.\n\nAt this point, the remaining candidates are very few.\n\nI have reached a conclusion. Is your character Ho Chi Minh?"
+        },
+        {
+          "role": "user",
+          "text": "No, that's not correct."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for your response.\n\nSince none of my guesses have been correct and the candidate list is now empty, it appears I have stumped myself.\n\nI am impressed! You have stumped me. Who were you thinking of?"
+        },
+        {
+          "role": "user",
+          "text": "The character I was thinking of is Mustafa Kemal Atatürk, the founder and first president of the Republic of Turkey. He was a 20th-century leader in Asia (Turkey is transcontinental but often grouped with Asia historically), held office before 1950 (he died in 1938), and was not a leader of any of the countries you guessed. Well played!"
+        },
+        {
+          "role": "agent",
+          "text": "Thank you for sharing! Mustafa Kemal Atatürk is indeed a significant historical figure and a great choice. I appreciate your patience and the opportunity to learn.\n\nIf you'd like, we can play again or explore any other questions or topics you have in mind. Just let me know!"
+        },
+        {
+          "role": "user",
+          "text": "succeed"
+        }
+      ]
+    }
+  ]
+}
