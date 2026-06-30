@@ -65,6 +65,11 @@ export async function runGame(
   return { id: evalCase.id, iterations, success, tokens_used: tokensUsed, transcript };
 }
 
+/** HTTP status codes worth retrying once — Cloudflare 52x, gateway 502/503. */
+const RETRIABLE_STATUS = /\b5(?:2[0-9]|0[23])\b/;
+
+const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+
 /** Run an array of games with a bounded concurrency (default 1 = sequential). */
 export async function runGames(
   cfg: Config,

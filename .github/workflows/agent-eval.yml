@@ -2,9 +2,6 @@ name: Agent Eval
 
 on:
   pull_request:
-    paths:
-      - "agents/**"
-      - "skills/**"
   workflow_dispatch:
     inputs:
       agent_name:
@@ -22,7 +19,7 @@ on:
       concurrency:
         description: "Number of eval games to run in parallel"
         required: false
-        default: "3"
+        default: "1"
 
 # Least privilege: write only what the eval needs (commit score + mark PR ready).
 permissions:
