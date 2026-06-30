@@ -3,8 +3,6 @@ name: Generate Eval Set
 on:
   pull_request:
     types: [opened, synchronize]
-    paths:
-      - "agents/*/system-prompt.md"
 
 # Least privilege: only needs to write back the generated eval-set.json.
 permissions:

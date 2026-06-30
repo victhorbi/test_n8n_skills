@@ -16,6 +16,16 @@ on:
     branches: [main]
     paths:
       - "agents/*/evals/logs/*.json"
+  workflow_dispatch:
+    inputs:
+      agent_name:
+        description: "Agent name to analyze (e.g. akinator)"
+        required: true
+        default: "akinator"
+      max_logs:
+        description: "Number of recent logs to include"
+        required: false
+        default: "5"
 
 permissions:
   contents: read
@@ -26,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
         with:
-          fetch-depth: 2  # need HEAD~1 for before/after counts
+          fetch-depth: 2  # need HEAD~1 for before/after counts on push
 
       - name: Count sessions per agent and trigger analysis
         env:
@@ -35,6 +45,9 @@ jobs:
           THRESHOLD:             ${{ vars.ANALYZE_SESSIONS_THRESHOLD || '5' }}
           OWNER:                 ${{ github.repository_owner }}
           REPO:                  ${{ github.event.repository.name }}
+          EVENT_NAME:            ${{ github.event_name }}
+          DISPATCH_AGENT:        ${{ github.event.inputs.agent_name }}
+          DISPATCH_MAX_LOGS:     ${{ github.event.inputs.max_logs || '5' }}
         run: |
           set -euo pipefail
 
@@ -43,7 +56,52 @@ jobs:
             exit 0
           fi
 
-          # Agents whose log folder changed in this push
+          # Discover skill paths (comma-separated list of skills/*.md, excluding README)
+          skills=$(git ls-files 'skills/*.md' | grep -vi 'readme' | paste -sd ',' - || true)
+
+          fire() {
+            local agent_folder="$1"
+            local max_logs="$2"
+            local system_prompt_path="${agent_folder}/system-prompt.md"
+
+            payload=$(python3 -c "
+import json, os
+print(json.dumps({
+  'owner':               os.environ['OWNER'],
+  'repo':                os.environ['REPO'],
+  'agent_folder':        os.environ['AGENT_FOLDER'],
+  'system_prompt_path':  os.environ['SYSTEM_PROMPT_PATH'],
+  'skills_paths':        os.environ['SKILLS'],
+  'base_branch':         'main',
+  'github_token':        os.environ['GITHUB_TOKEN'],
+  'max_logs':            int(os.environ['MAX_LOGS']),
+}))" \
+              AGENT_FOLDER="$agent_folder" \
+              SYSTEM_PROMPT_PATH="$system_prompt_path" \
+              SKILLS="$skills" \
+              MAX_LOGS="$max_logs"
+
+            http_status=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$N8N_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$payload")
+
+            if [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]; then
+              echo "  → n8n webhook accepted (HTTP ${http_status})"
+            else
+              echo "  ✗ n8n webhook returned HTTP ${http_status}"
+              exit 1
+            fi
+          }
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            agent_folder="agents/${DISPATCH_AGENT}"
+            echo "Manual dispatch — firing for ${agent_folder} (max_logs=${DISPATCH_MAX_LOGS})"
+            fire "$agent_folder" "$DISPATCH_MAX_LOGS"
+            exit 0
+          fi
+
+          # push path: only fire when log count crosses the threshold from below
           changed_agents=$(git diff --name-only HEAD~1 HEAD \
             | grep '^agents/[^/]*/evals/logs/.*\.json$' \
             | sed 's|^\(agents/[^/]*\)/.*|\1|' \
@@ -54,13 +112,9 @@ jobs:
             exit 0
           fi
 
-          # Discover skill paths (comma-separated list of skills/*.md, excluding README)
-          skills=$(git ls-files 'skills/*.md' | grep -vi 'readme' | paste -sd ',' - || true)
-
           while IFS= read -r agent_folder; do
             [ -z "$agent_folder" ] && continue
 
-            # Total logs now and before this push
             total_now=$(git ls-files "${agent_folder}/evals/logs/" | grep '\.json$' | wc -l | tr -d ' ')
             added_this_push=$(git diff --name-only HEAD~1 HEAD \
               | grep "^${agent_folder}/evals/logs/.*\.json$" | wc -l | tr -d ' ')
@@ -68,40 +122,9 @@ jobs:
 
             echo "${agent_folder}: ${total_before} → ${total_now} sessions (threshold: ${THRESHOLD})"
 
-            # Only trigger when the count crosses the threshold from below
             if [ "$total_before" -lt "$THRESHOLD" ] && [ "$total_now" -ge "$THRESHOLD" ]; then
-              agent_name=$(echo "$agent_folder" | sed 's|agents/||')
-              system_prompt_path="${agent_folder}/system-prompt.md"
-
-              echo "✓ Threshold crossed for ${agent_folder} — calling analyze-and-improve"
-
-              payload=$(python3 -c "
-import json, os
-print(json.dumps({
-  'owner':               os.environ['OWNER'],
-  'repo':                os.environ['REPO'],
-  'agent_folder':        os.environ['AGENT_FOLDER'],
-  'system_prompt_path':  os.environ['SYSTEM_PROMPT_PATH'],
-  'skills_paths':        os.environ['SKILLS'],
-  'base_branch':         'main',
-  'github_token':        os.environ['GITHUB_TOKEN'],
-  'max_logs':            int(os.environ['THRESHOLD']),
-}))" \
-                AGENT_FOLDER="$agent_folder" \
-                SYSTEM_PROMPT_PATH="$system_prompt_path" \
-                SKILLS="$skills")
-
-              http_status=$(curl -s -o /dev/null -w "%{http_code}" \
-                -X POST "$N8N_WEBHOOK_URL" \
-                -H "Content-Type: application/json" \
-                -d "$payload")
-
-              if [ "$http_status" -ge 200 ] && [ "$http_status" -lt 300 ]; then
-                echo "  → n8n webhook accepted (HTTP ${http_status})"
-              else
-                echo "  ✗ n8n webhook returned HTTP ${http_status}"
-                exit 1
-              fi
+              echo "✓ Threshold crossed — calling analyze-and-improve"
+              fire "$agent_folder" "$THRESHOLD"
             else
               echo "  Threshold not yet crossed — nothing to do."
             fi
