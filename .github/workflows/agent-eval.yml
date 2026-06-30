@@ -22,7 +22,7 @@ on:
       concurrency:
         description: "Number of eval games to run in parallel"
         required: false
-        default: "3"
+        default: "1"
 
 # Least privilege: write only what the eval needs (commit score + mark PR ready).
 permissions:
@@ -126,6 +126,6 @@ jobs:
           PR_NUMBER:            ${{ github.event.pull_request.number }}
           MIN_SUCCESS_RATE:     ${{ github.event.inputs.min_success_rate || '50' }}
           MAX_AVG_ITERATIONS:   ${{ github.event.inputs.max_avg_iterations || '30' }}
-          CONCURRENCY:          ${{ github.event.inputs.concurrency || '3' }}
+          CONCURRENCY:          ${{ github.event.inputs.concurrency || '1' }}
           FAIL_ON_REGRESSION:   "false"
         run: npm run eval
