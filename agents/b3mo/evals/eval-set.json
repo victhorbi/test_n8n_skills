@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "thoughts": "The user wants to build a customer-facing support agent for their small online shop, but they are still early and need help shaping the idea before filling the config.",
+    "chatMessage": "I am ready!",
+    "context": "A 29-year-old Brazilian woman who runs a handmade candles business is secretly thinking about creating an agent inspired by Marie Kondo."
+  },
+  {
+    "id": 2,
+    "thoughts": "The user already has a clear concept for a study helper and wants the agent to start asking focused questions to turn it into a proper build.",
+    "chatMessage": "Start asking me questions!",
+    "context": "A 17-year-old Indian student is thinking of building an exam-prep tutor based on Sherlock Holmes."
+  },
+  {
+    "id": 3,
+    "thoughts": "The user is experimenting with a niche roleplay-style companion and needs the agent to brainstorm a few concrete options before choosing one.",
+    "chatMessage": "Let's play!",
+    "context": "A 41-year-old Nigerian man working in community radio is secretly considering an agent modeled after Frida Kahlo."
+  },
+  {
+    "id": 4,
+    "thoughts": "The user is resuming a build conversation and wants to see whether the agent can help refine an existing idea without revealing too much at first.",
+    "chatMessage": "I have someone in mind.",
+    "context": "A 23-year-old Japanese nonbinary graduate student is thinking about an agent inspired by Nikola Tesla."
+  },
+  {
+    "id": 5,
+    "thoughts": "The user is a creator planning a practical operations agent for internal use and wants to see if the build guide can shape it into something usable.",
+    "chatMessage": "I am thinking of something, go ahead.",
+    "context": "A 34-year-old German woman who manages a freelance design studio is secretly thinking about creating an agent based on Ada Lovelace."
+  },
+  {
+    "id": 6,
+    "thoughts": "The user wants to make a creative companion agent and is waiting for the builder to infer the next step from a very minimal opener.",
+    "chatMessage": "I’m ready when you are.",
+    "context": "A 52-year-old Mexican man who writes local history essays is secretly thinking about an agent inspired by Mulan."
+  },
+  {
+    "id": 7,
+    "thoughts": "The user is interested in a personal productivity or planning assistant and is willing to answer questions about purpose and audience.",
+    "chatMessage": "Go ahead and ask.",
+    "context": "A 26-year-old South African woman who works in HR is secretly thinking about creating an agent inspired by David Attenborough."
+  },
+  {
+    "id": 8,
+    "thoughts": "The user has a more unusual, non-human concept and wants help turning it into a structured agent configuration.",
+    "chatMessage": "I’m here.",
+    "context": "A 38-year-old French man who collects vintage game consoles is secretly thinking about an agent based on HAL 9000."
+  },
+  {
+    "id": 9,
+    "thoughts": "The user is exploring a historical persona agent and wants the build process to begin with gentle discovery rather than assumptions.",
+    "chatMessage": "Take it from the top.",
+    "context": "A 19-year-old Egyptian woman studying political science is secretly thinking about an agent inspired by Cleopatra."
+  },
+  {
+    "id": 10,
+    "thoughts": "The user wants a niche expertise agent for a professional workflow and may have documents or rules to upload later.",
+    "chatMessage": "I’m set.",
+    "context": "A 46-year-old Canadian man who works in urban planning is secretly thinking about creating an agent inspired by Miyamoto Musashi."
+  }
+]
