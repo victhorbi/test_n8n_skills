@@ -1,0 +1,206 @@
+name: Provision n8n Agent Workflow
+
+# Runs when a new agent folder (agents/*/system-prompt.md) is added via PR.
+# For each new agent it:
+#   1. Generates a new n8n workflow (twin of the reference chat-trigger template)
+#   2. Activates it via the n8n REST API
+#   3. Sets N8N_AGENT_<AGENTNAME_UPPER>_WEBHOOK_URL as a repo secret
+#
+# Required secrets:
+#   N8N_API_URL  — n8n instance base URL, e.g. https://my-n8n.example.com
+#   N8N_API_KEY  — n8n API key (Settings → n8n API)
+#
+# Optional repo variable:
+#   N8N_AGENT_SKILLS_WORKFLOW_ID  — workflow ID of "AI Agents — 0 - Agent + skills"
+#                                   (defaults to 3cqVVop36Bx3ySMa)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "agents/*/system-prompt.md"
+
+permissions:
+  contents: read
+  secrets: write
+
+concurrency:
+  group: provision-n8n-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # actions/checkout v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect newly added agent folders
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          new_agents=$(git diff --name-only --diff-filter=A "$BASE_SHA" "$HEAD_SHA" \
+            | grep '^agents/[^/]*/system-prompt\.md$' \
+            | sed 's|/system-prompt\.md$||' || true)
+          if [ -z "$new_agents" ]; then
+            echo "No new agent folders — skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "New agent folders: $new_agents"
+            { echo "agents<<EOF"; echo "$new_agents"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Provision workflow and set secret
+        if: steps.detect.outputs.skip == 'false'
+        env:
+          N8N_API_URL:   ${{ secrets.N8N_API_URL }}
+          N8N_API_KEY:   ${{ secrets.N8N_API_KEY }}
+          GH_TOKEN:      ${{ secrets.GITHUB_TOKEN }}
+          OWNER:         ${{ github.repository_owner }}
+          REPO:          ${{ github.event.repository.name }}
+          SKILLS_WF_ID:  ${{ vars.N8N_AGENT_SKILLS_WORKFLOW_ID || '3cqVVop36Bx3ySMa' }}
+          AGENTS:        ${{ steps.detect.outputs.agents }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${N8N_API_URL:-}" ] || [ -z "${N8N_API_KEY:-}" ]; then
+            echo "N8N_API_URL or N8N_API_KEY not configured — skipping."
+            exit 0
+          fi
+
+          # Static schema shared by all agent workflows (same fields, no interpolation needed)
+          schema='[
+            {"id":"chatInput","displayName":"chatInput","required":false,"defaultMatch":false,"display":true,"canBeUsedToMatch":true,"removed":false},
+            {"id":"sessionId","displayName":"sessionId","required":false,"defaultMatch":false,"display":true,"canBeUsedToMatch":true,"type":"string","removed":false},
+            {"id":"agentFolder","displayName":"agentFolder","required":false,"defaultMatch":false,"display":true,"canBeUsedToMatch":true,"type":"string","removed":false},
+            {"id":"owner","displayName":"owner","required":false,"defaultMatch":false,"display":true,"canBeUsedToMatch":true,"type":"string","removed":false},
+            {"id":"repo","displayName":"repo","required":false,"defaultMatch":false,"display":true,"canBeUsedToMatch":true,"type":"string","removed":false},
+            {"id":"branch","displayName":"branch","required":false,"defaultMatch":false,"display":true,"canBeUsedToMatch":true,"type":"string","removed":false}
+          ]'
+
+          while IFS= read -r agent_folder; do
+            [ -z "$agent_folder" ] && continue
+
+            agent_name=$(basename "$agent_folder")
+            agent_upper=$(echo "$agent_name" | tr '[:lower:]-' '[:upper:]_')
+            secret_name="N8N_AGENT_${agent_upper}_WEBHOOK_URL"
+
+            # Idempotency: skip if secret already exists
+            if gh api "repos/${OWNER}/${REPO}/actions/secrets/${secret_name}" --silent 2>/dev/null; then
+              echo "⚠️  ${secret_name} already set — skipping."
+              continue
+            fi
+
+            echo "→ Provisioning n8n workflow for ${agent_folder}…"
+
+            display_name=$(python3 -c "print('${agent_name}'.replace('-', ' ').title())")
+            webhook_id=$(python3 -c "import uuid; print(uuid.uuid4())")
+            node1_id=$(python3 -c "import uuid; print(uuid.uuid4())")
+            node2_id=$(python3 -c "import uuid; print(uuid.uuid4())")
+
+            workflow_json=$(jq -n \
+              --arg display    "$display_name" \
+              --arg wh_id      "$webhook_id" \
+              --arg n1_id      "$node1_id" \
+              --arg n2_id      "$node2_id" \
+              --arg af         "$agent_folder" \
+              --arg sw_id      "$SKILLS_WF_ID" \
+              --arg owner      "$OWNER" \
+              --arg repo       "$REPO" \
+              --argjson schema "$schema" \
+              '{
+                name: ("AI Agent — " + $display),
+                active: false,
+                nodes: [
+                  {
+                    parameters: {
+                      "public": true,
+                      initialMessages: ($display + " Agent through n8n - limited!!!"),
+                      options: {}
+                    },
+                    type: "@n8n/n8n-nodes-langchain.chatTrigger",
+                    typeVersion: 1.4,
+                    position: [304, 144],
+                    id: $n1_id,
+                    name: "When chat message received",
+                    webhookId: $wh_id
+                  },
+                  {
+                    parameters: {
+                      workflowId: {
+                        "__rl": true,
+                        value: $sw_id,
+                        mode: "list",
+                        cachedResultUrl: ("/workflow/" + $sw_id),
+                        cachedResultName: "AI Agents — 0 - Agent + skills"
+                      },
+                      workflowInputs: {
+                        mappingMode: "defineBelow",
+                        value: {
+                          chatInput:   "={{ $json.chatInput }}",
+                          sessionId:   "={{ $json.sessionId }}",
+                          agentFolder: ("={{ $json.agentFolder || \"" + $af    + "\" }}"),
+                          branch:      "={{ $json.branch || \"main\" }}",
+                          repo:        ("={{ $json.repo || \""        + $repo  + "\" }}"),
+                          owner:       ("={{ $json.owner || \""       + $owner + "\" }}")
+                        },
+                        matchingColumns: ["chatInput"],
+                        schema: $schema,
+                        attemptToConvertTypes: false,
+                        convertFieldsToString: true
+                      },
+                      options: {}
+                    },
+                    type: "n8n-nodes-base.executeWorkflow",
+                    typeVersion: 1.2,
+                    position: [704, 144],
+                    name: "Call generic agent + skills",
+                    id: $n2_id
+                  }
+                ],
+                connections: {
+                  "When chat message received": {
+                    main: [[{node: "Call generic agent + skills", type: "main", index: 0}]]
+                  },
+                  "Call generic agent + skills": { main: [[]] }
+                },
+                pinData: {},
+                settings: {executionOrder: "v1"}
+              }')
+
+            # Create the workflow in n8n
+            create_out=$(curl -s -w "\n%{http_code}" \
+              -X POST "${N8N_API_URL}/api/v1/workflows" \
+              -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "$workflow_json")
+            http_code=$(echo "$create_out" | tail -1)
+            body=$(echo "$create_out" | head -n -1)
+            if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+              echo "✗ Failed to create n8n workflow (HTTP ${http_code}): ${body}"
+              exit 1
+            fi
+            n8n_wf_id=$(echo "$body" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+            echo "  Created n8n workflow: ${n8n_wf_id}"
+
+            # Activate so the production webhook is live
+            act_out=$(curl -s -w "\n%{http_code}" \
+              -X POST "${N8N_API_URL}/api/v1/workflows/${n8n_wf_id}/activate" \
+              -H "X-N8N-API-KEY: ${N8N_API_KEY}")
+            act_code=$(echo "$act_out" | tail -1)
+            if [ "$act_code" -lt 200 ] || [ "$act_code" -ge 300 ]; then
+              echo "✗ Failed to activate workflow (HTTP ${act_code})"
+              exit 1
+            fi
+            echo "  Activated"
+
+            webhook_url="${N8N_API_URL}/webhook/${webhook_id}"
+            printf '%s' "$webhook_url" | gh secret set "$secret_name" --repo "${OWNER}/${REPO}"
+            echo "✓ ${secret_name} → ${webhook_url}"
+
+          done <<< "$AGENTS"
