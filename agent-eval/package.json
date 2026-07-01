@@ -5,7 +5,7 @@
   "description": "Repo-driven eval harness for the Akinator-style agent. Runs in GitHub Actions on PRs; the agent under test is hosted as an n8n chat webhook.",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "eval": "tsx src/index.ts",

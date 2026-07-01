@@ -112,6 +112,38 @@ jobs:
         run: npm ci
         working-directory: agent-eval
 
+      - name: Report eval start
+        if: steps.check_secret.outputs.skip == 'false'
+        env:
+          GH_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          OWNER:     ${{ github.repository_owner }}
+          REPO:      ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL:   https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          AGENT:     ${{ matrix.agent_folder }}
+          BRANCH:    ${{ github.head_ref || github.ref_name }}
+          CONCUR:    ${{ github.event.inputs.concurrency || '5' }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## ⏳ Agent eval — running"
+            echo ""
+            echo "**Agent:** \`${AGENT}\`  "
+            echo "**Ref:** \`${BRANCH}\`${PR_NUMBER:+ · PR #${PR_NUMBER}}  "
+            echo "**Concurrency:** ${CONCUR}  "
+            echo "**Run:** [View live logs →](${RUN_URL})"
+            echo ""
+            echo "_Results will appear below once the eval finishes._"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -n "${PR_NUMBER:-}" ]; then
+            body=$(printf '⏳ **Agent eval running** — `%s`\n\nConcurrency: %s · Branch: `%s`\n[View live logs →](%s)' \
+              "$AGENT" "$CONCUR" "$BRANCH" "$RUN_URL")
+            comment_id=$(gh api "repos/${OWNER}/${REPO}/issues/${PR_NUMBER}/comments" \
+              --method POST -f body="$body" --jq '.id' 2>/dev/null || echo "")
+            echo "${comment_id:-}" > /tmp/eval-comment-id.txt
+          fi
+
       - name: Run eval
         if: steps.check_secret.outputs.skip == 'false'
         working-directory: agent-eval
@@ -126,6 +158,45 @@ jobs:
           PR_NUMBER:            ${{ github.event.pull_request.number }}
           MIN_SUCCESS_RATE:     ${{ github.event.inputs.min_success_rate || '50' }}
           MAX_AVG_ITERATIONS:   ${{ github.event.inputs.max_avg_iterations || '30' }}
-          CONCURRENCY:          ${{ github.event.inputs.concurrency || '1' }}
+          CONCURRENCY:          ${{ github.event.inputs.concurrency || '5' }}
           FAIL_ON_REGRESSION:   "false"
-        run: npm run eval
+        run: npm run eval | tee /tmp/eval-out.txt; exit "${PIPESTATUS[0]}"
+
+      - name: Report eval result
+        if: always() && steps.check_secret.outputs.skip == 'false'
+        env:
+          GH_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          OWNER:     ${{ github.repository_owner }}
+          REPO:      ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL:   https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          AGENT:     ${{ matrix.agent_folder }}
+        run: |
+          set -euo pipefail
+          result_line=$(grep '^EVAL_RESULT_JSON ' /tmp/eval-out.txt 2>/dev/null | tail -1 || echo "")
+          if [ -z "$result_line" ]; then
+            verdict="❌ eval did not complete"
+            detail="Check the [run logs](${RUN_URL}) for errors."
+          else
+            result_json="${result_line#EVAL_RESULT_JSON }"
+            improved=$(echo "$result_json" | python3 -c "import sys,json; d=json.load(sys.stdin); print('true' if d.get('improved') else 'false')")
+            rate=$(echo "$result_json"     | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['stats']['success_rate'])")
+            iters=$(echo "$result_json"    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['stats']['avg_iterations'])")
+            games=$(echo "$result_json"    | python3 -c "import sys,json; d=json.load(sys.stdin); s=d['stats']; print(f\"{s['successful_games']}/{s['total_games']}\")")
+            if [ "$improved" = "true" ]; then
+              verdict="✅ passed"
+            else
+              verdict="❌ did not improve"
+            fi
+            detail="Success rate: **${rate}%** · Avg iterations: **${iters}** · Games: **${games}**"
+          fi
+
+          if [ -n "${PR_NUMBER:-}" ] && [ -f /tmp/eval-comment-id.txt ]; then
+            comment_id=$(cat /tmp/eval-comment-id.txt)
+            if [ -n "$comment_id" ]; then
+              body=$(printf '%s — `%s`\n\n%s\n[View run →](%s)' \
+                "$verdict" "$AGENT" "$detail" "$RUN_URL")
+              gh api "repos/${OWNER}/${REPO}/issues/comments/${comment_id}" \
+                --method PATCH -f body="$body" > /dev/null 2>&1 || true
+            fi
+          fi

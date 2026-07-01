@@ -22,6 +22,10 @@ on:
         description: "Agent name to analyze (e.g. akinator)"
         required: true
         default: "akinator"
+      base_branch:
+        description: "Branch to fetch agent files and logs from"
+        required: false
+        default: "main"
       max_logs:
         description: "Number of recent logs to include"
         required: false
@@ -47,6 +51,7 @@ jobs:
           EVENT_NAME:            ${{ github.event_name }}
           DISPATCH_AGENT:        ${{ github.event.inputs.agent_name }}
           DISPATCH_MAX_LOGS:     ${{ github.event.inputs.max_logs || '5' }}
+          BASE_BRANCH:           ${{ github.event.inputs.base_branch || github.ref_name }}
         run: |
           set -euo pipefail
 
@@ -69,7 +74,7 @@ jobs:
               --arg agent_folder        "$agent_folder" \
               --arg system_prompt_path  "$system_prompt_path" \
               --arg skills_paths        "$skills" \
-              --arg base_branch         "main" \
+              --arg base_branch         "$BASE_BRANCH" \
               --argjson max_logs        "${max_logs:-5}" \
               '{owner: $owner, repo: $repo, agent_folder: $agent_folder,
                 system_prompt_path: $system_prompt_path, skills_paths: $skills_paths,
