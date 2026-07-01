@@ -2,6 +2,9 @@ name: Agent Eval
 
 on:
   pull_request:
+    paths:
+      - "agents/*/system-prompt.md"
+      - "skills/**"
   workflow_dispatch:
     inputs:
       agent_name:
