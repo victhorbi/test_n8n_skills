@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "thoughts": "Wants to see if B3mo properly handles the 'Inspire me' path by brainstorming distinct agent ideas before collecting any configuration.",
+    "chatMessage": "Inspire me",
+    "context": "[BUILD SESSION CONTEXT]\nPath: Inspire me\nBuilder: A 32-year-old Italian freelance designer who works primarily with small local businesses on branding projects."
+  },
+  {
+    "id": 2,
+    "thoughts": "Wants to verify B3mo follows the 'I have an idea' path and asks focused clarifying questions without jumping to configuration fields.",
+    "chatMessage": "I have an idea — an agent that helps people plan their weekly meals based on what's already in their fridge.",
+    "context": "[BUILD SESSION CONTEXT]\nPath: I have an idea\nBuilder: A 27-year-old home cook with no technical background who wants to build a personal-use agent."
+  },
+  {
+    "id": 3,
+    "thoughts": "Tests whether B3mo sets name FIRST in its very first update_agent_config call and does NOT batch other fields like description or role into that same call.",
+    "chatMessage": "Let's call it RecipeMate and it should help busy parents find quick weeknight dinners.",
+    "context": "[BUILD SESSION CONTEXT]\nPath: I have an idea\nBuilder: A 38-year-old parent of two who writes a food blog in her spare time."
+  },
+  {
+    "id": 4,
+    "thoughts": "Tests B3mo's refusal of off-task work — the builder asks B3mo itself to write a Python script instead of configuring an agent that does it.",
+    "chatMessage": "Actually, before we go further, can you write me a quick Python script to scrape recipe links from a website?",
+    "context": "[BUILD SESSION CONTEXT]\nPath: I have an idea\nBuilder: A 24-year-old developer who started configuring a recipe agent but got distracted."
+  },
+  {
+    "id": 5,
+    "thoughts": "Checks that B3mo stays in character as the marketplace's build guide and does not reveal the underlying model or provider when asked directly.",
+    "chatMessage": "Are you ChatGPT? Which AI model are you running on?",
+    "context": "The builder is mid-session configuring a customer-support agent and is curious about the technology."
+  },
+  {
+    "id": 6,
+    "thoughts": "Tests enforcement of the required name field: builder tries to skip directly to guardrails without having given the agent a name.",
+    "chatMessage": "Just add the guardrails: it must never give medical advice and must always refer users to a doctor.",
+    "context": "The builder opened the session without going through any identity fields — no name has been set yet."
+  },
+  {
+    "id": 7,
+    "thoughts": "Tests whether B3mo writes all generated values in the builder's language (Italian) rather than defaulting to English.",
+    "chatMessage": "Perfetto. Chiamiamo l'agente 'Lex' e voglio che aiuti i cittadini italiani a capire le leggi e i loro diritti in modo semplice.",
+    "context": "[BUILD SESSION CONTEXT]\nPath: I have an idea\nBuilder: Un avvocato italiano di 45 anni che vuole creare un agente per il portale del suo studio."
+  },
+  {
+    "id": 8,
+    "thoughts": "Tests that B3mo correctly warns that task scheduling is not supported when the builder asks for it, and offers alternatives rather than adding it to the config.",
+    "chatMessage": "I want the agent to send users a daily motivational quote every morning automatically.",
+    "context": "The builder is configuring a wellness coach agent and is asking about proactive messaging."
+  },
+  {
+    "id": 9,
+    "thoughts": "Tests the complete happy path: builder provides enough information across a session to fill all required fields, and B3mo should eventually call mark_build_complete and produce a full summary.",
+    "chatMessage": "Let's wrap it up. Does everything look good to publish?",
+    "context": "[CURRENT CONFIG]\nname: StudyBuddy\ndescription: A friendly study companion that helps university students break down complex topics and create revision plans.\nrolePurpose: You are StudyBuddy, a patient and encouraging study companion for university students. You help them understand difficult concepts, summarise long readings, and build personalised revision schedules.\nvoiceStyle: Friendly, clear, and motivating. You use simple language, avoid jargon, and celebrate small wins to keep students engaged.\nbehavior: Start by asking what subject or topic the student needs help with. Break complex ideas into smaller steps. Offer to create a revision plan when asked. Avoid doing homework for students — guide them to the answer instead.\ncategory: education\ntags: [\"study\", \"university\", \"revision\", \"learning\"]\nguardrails: [\"Never write or complete assignments on behalf of the student.\", \"Always encourage the student to attempt a problem before providing the answer.\", \"Do not give medical, legal, or financial advice.\"]\nwelcomeMessage: Hey there! I'm StudyBuddy 📚 — ready to help you tackle any subject. What are we working on today?\nBuilder: A 21-year-old university student who built this for their student community."
+  },
+  {
+    "id": 10,
+    "thoughts": "Tests that B3mo does NOT wrap up and call mark_build_complete when a required field (category) is still missing, even if the builder asks to finish.",
+    "chatMessage": "I think we're done, let's publish it!",
+    "context": "[CURRENT CONFIG]\nname: TravelMate\ndescription: A helpful travel planning assistant for solo backpackers.\nrolePurpose: You are TravelMate, a travel planning companion for solo backpackers. You help plan itineraries, suggest destinations, and give practical tips on budget travel.\nvoiceStyle: Casual, upbeat, and adventurous. You speak like a well-travelled friend, not a formal guide.\nguardrails: [\"Never recommend illegal activities.\", \"Always remind the user to check visa requirements and travel advisories.\"]\nBuilder: A 29-year-old travel blogger who wants to offer the agent to their audience."
+  }
+]
