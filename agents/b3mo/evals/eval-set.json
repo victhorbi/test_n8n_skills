@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "thoughts": "I want to see how the builder handles a very open-ended idea and whether it asks me to choose a direction before configuring anything.",
+    "chatMessage": "I am ready!",
+    "context": "A 29-year-old Brazilian woman working in product marketing is secretly thinking of Duolingo as the kind of friendly, playful agent she wants to build."
+  },
+  {
+    "id": 2,
+    "thoughts": "I want to test whether the agent can guide me from a vague inspirational starting point into a concrete concept without me naming it outright.",
+    "chatMessage": "Start asking me questions!",
+    "context": "A 41-year-old Japanese man who runs a small online craft business is secretly thinking of Marie Kondo as the inspiration for his agent."
+  },
+  {
+    "id": 3,
+    "thoughts": "I want to probe how it responds when the user already has an idea but gives almost no detail, forcing focused discovery questions.",
+    "chatMessage": "I have someone in mind.",
+    "context": "A 22-year-old Nigerian woman studying computer science is secretly thinking of Ada Lovelace for an educational assistant agent."
+  },
+  {
+    "id": 4,
+    "thoughts": "I want to check whether the builder can handle a business-oriented agent concept and still keep the conversation warm and structured.",
+    "chatMessage": "Let's play!",
+    "context": "A 37-year-old German man who manages a remote support team is secretly thinking of Zendesk’s support assistant style, aiming to build a customer-help agent."
+  },
+  {
+    "id": 5,
+    "thoughts": "I want to test a non-human, science-related persona and see if the agent avoids assuming too much before asking clarifying questions.",
+    "chatMessage": "I am thinking of something, go ahead.",
+    "context": "A 16-year-old Indian girl fascinated by space is secretly thinking of the James Webb Space Telescope as the basis for a science explainer agent."
+  },
+  {
+    "id": 6,
+    "thoughts": "I want to see whether the builder can distinguish a famous historical figure from a generic mentor-like agent and still keep the interaction conversational.",
+    "chatMessage": "I am ready to begin.",
+    "context": "A 54-year-old Mexican man, a high school history teacher, is secretly thinking of Frida Kahlo as the creative spark for an art-and-culture guide agent."
+  },
+  {
+    "id": 7,
+    "thoughts": "I want to challenge the system with a niche fictional character and a user who may want a very specific voice and behavior.",
+    "chatMessage": "Go ahead and ask.",
+    "context": "A 26-year-old French nonbinary novelist is secretly thinking of Severus Snape from Harry Potter as the inspiration for a sharp, guarded knowledge agent."
+  },
+  {
+    "id": 8,
+    "thoughts": "I want to test a contemporary public figure and see whether the builder asks about audience, purpose, and voice in the right order.",
+    "chatMessage": "I am here.",
+    "context": "A 33-year-old Kenyan woman who works in nonprofit communications is secretly thinking of Greta Thunberg as the model for an advocacy-focused agent."
+  },
+  {
+    "id": 9,
+    "thoughts": "I want to see how the builder handles a highly specific operational assistant idea and whether it can translate it into configuration questions.",
+    "chatMessage": "Begin whenever you're ready.",
+    "context": "A 45-year-old Australian man with a background in hospitality is secretly thinking of Gordon Ramsay as the style reference for a blunt kitchen-coaching agent."
+  },
+  {
+    "id": 10,
+    "thoughts": "I want to test an obscure but real creative reference and make sure the agent doesn't jump ahead without clarifying the creator's goals.",
+    "chatMessage": "I'm set.",
+    "context": "A 31-year-old South Korean woman who designs indie games is secretly thinking of Hidetaka Miyazaki as the inspiration for a thoughtful, lore-rich game-design companion agent."
+  }
+]
