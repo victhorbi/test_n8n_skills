@@ -10,7 +10,6 @@ export interface GenerateConfig extends GithubCreds {
   model: string;
 }
 
-// Ported directly from the "Generate Evals" chainLlm prompt in 0-Generate-eval.json.
 function buildPrompt(systemMessage: string, count: number): string {
   return `Given this system message for an AI agent:
 
@@ -18,16 +17,16 @@ ${systemMessage}
 
 Generate ${count} diverse test cases to evaluate this agent. Return ONLY a valid JSON array — no markdown, no explanation.
 
-Each object must have exactly these fields, carefully crafted to reflect realistic user behaviour:
+Each object must have exactly these fields, carefully crafted to reflect realistic user behaviour for this specific agent:
 - id: sequential integer
-- thoughts: what the user thinks before or while composing their message — their motivation, curiosity, or goal. This is internal and never sent to the agent.
-- chatMessage: the user opening message to start the interaction. CRITICAL: this must be a neutral, non-revealing opener. Do NOT include the character name, gender, nationality, era, category, or any other identifying hint in this field. Use vague phrases such as: "I am ready!", "Let's play!", "I have someone in mind.", "I am thinking of something, go ahead.", "Start asking me questions!". The agent must receive zero usable information from the chatMessage alone.
-- context: 1-2 sentences describing the user scenario — who the user is (age, nationality, background) and which specific character or entity they are secretly thinking of. The character name must appear here and nowhere else.
+- thoughts: the user's internal motivation, expectation, or emotional state before composing their message. This is never sent to the agent.
+- chatMessage: the user's opening message to start the interaction. This should be a realistic, natural message appropriate for the type of agent described above.
+- context: 1-2 sentences describing the user scenario — who the user is (age, background, mood) and what outcome they are hoping for from this interaction.
 
 Diversity requirements:
 - Vary the user age, gender, and cultural background across the set
-- Vary the character category and difficulty: mix famous and obscure, fictional and real, historical and contemporary, human and non-human
-- Decide what else to vary based on what the system message tells you this agent specialises in`;
+- Vary the user scenarios, topics, and goals to cover different aspects of what this agent specialises in
+- Decide what else to vary based on what the system message tells you this agent is designed to do`;
 }
 
 // Ported from the "Parse and Validate" Code node in 0-Generate-eval.json.
