@@ -153,7 +153,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const collectSkillsData = $('Collect Skills').first().json;\nlet dir;\ntry {\n  const resp = $input.first().json;\n  dir = Array.isArray(resp) ? resp : [];\n} catch(e) { dir = []; }\n\nconst entries = dir\n  .filter(e => e.type === 'file' && e.name.endsWith('.json'))\n  .sort((a, b) => b.name.localeCompare(a.name))\n  .slice(0, collectSkillsData.max_logs);\n\nif (entries.length === 0) {\n  return [{ json: { _no_logs: true } }];\n}\nreturn entries.map(e => ({ json: {\n  log_path: e.path, owner: collectSkillsData.owner,\n  repo: collectSkillsData.repo, base_branch: collectSkillsData.base_branch,\n} }));"
+        "jsCode": "const collectSkillsData = $('Collect Skills').first().json;\n\n// n8n HTTP Request splits JSON array responses into individual items.\n// Collect all items; if the first item is itself an array (non-split path), unwrap it.\nconst allItems = $input.all().map(item => item.json).filter(j => j && !j.error);\nconst first = allItems[0];\nconst dir = Array.isArray(first) ? first : allItems;\n\nconst entries = dir\n  .filter(e => e && e.type === 'file' && typeof e.name === 'string' && e.name.endsWith('.json'))\n  .sort((a, b) => b.name.localeCompare(a.name))\n  .slice(0, collectSkillsData.max_logs);\n\nif (entries.length === 0) {\n  return [{ json: { _no_logs: true } }];\n}\nreturn entries.map(e => ({ json: {\n  log_path: e.path,\n  owner: collectSkillsData.owner,\n  repo: collectSkillsData.repo,\n  base_branch: collectSkillsData.base_branch,\n} }));"
       },
       "id": "aai-n007",
       "name": "Prepare Log Items",
